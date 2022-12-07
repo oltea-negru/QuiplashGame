@@ -5,12 +5,13 @@
 
     <h2 class="title">ECS Example Game</h2>
 
-    <div id="game">
-        <div v-if="connected">
-            <%- include('chat'); -%>
+    <div  id="game">
+        <div >
+            <p>my state: {{me.state}}</p>>
+            <p>game state:{{state.state}}</p>
         </div>
-        <div v-else>
-            <p>Connecting...</p>
+        <div>
+            <button v-on:click="reverseState">ReverseState</button>
         </div>
     </div>
 

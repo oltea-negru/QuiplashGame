@@ -4,51 +4,62 @@ var socket = null;
 var app = new Vue({
     el: '#game',
     data: {
-        connected: false,
-        messages: [],
+        error: null,
+        me: { name: '', score: 0, state: 0 },
+        state: { state: false },
+        players: {},
         chatmessage: '',
     },
-    mounted: function() {
-        connect(); 
+    mounted: function ()
+    {
+        connect();
     },
     methods: {
-        handleChat(message) {
-            if(this.messages.length + 1 > 10) {
-                this.messages.pop();
-            }
-            this.messages.unshift(message);
+        handleStatus(state)
+        {
+            this.state.state = !state;
         },
-        chat() {
-            socket.emit('chat',this.chatmessage);
-            this.chatmessage = '';
-        },
+        reverseState()
+        {
+            socket.emit('stateChange', this.state.state);
+        }
     }
 });
 
-function connect() {
+function connect()
+{
     //Prepare web socket
     socket = io();
 
     //Connect
-    socket.on('connect', function() {
-        //Set connected state to true
-        app.connected = true;
+    socket.on('connect', function ()
+    {
+        app.state.state = 0;
     });
 
     //Handle connection error
-    socket.on('connect_error', function(message) {
+    socket.on('connect_error', function (message)
+    {
+        app.error = message;
         alert('Unable to connect: ' + message);
     });
 
     //Handle disconnection
-    socket.on('disconnect', function() {
+    socket.on('disconnect', function ()
+    {
         alert('Disconnected');
-        app.connected = false;
+        app.state.state = false;
     });
 
-    //Handle incoming chat message
-    socket.on('chat', function(message) {
-        app.handleChat(message);
+    // //Handle incoming chat message
+    // socket.on('chat', function (message)
+    // {
+    //     app.handleChat(message);
+    // });
+
+    socket.on('stateChange', function (state)
+    {
+        app.handleStatus(state);
     });
 
 

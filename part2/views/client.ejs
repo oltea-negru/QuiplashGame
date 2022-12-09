@@ -11,11 +11,7 @@
             </div>
             <div v-else-if="me.state==2">
                 <div v-if="state==0">
-                    <h2>Waiting for players...</h2>
-                    <p v-for="player in players">
-                        {{player}}
-                    </p>
-                    <button v-on:click="startGame" class="btn btn-primary">Start game</button>
+                    <%- include('waiting_room') %>
                 </div>
                 <div v-else-if="state==1">
                     <h2>In GAMEEEEEEE youre not</h2>

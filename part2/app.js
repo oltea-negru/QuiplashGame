@@ -145,6 +145,16 @@ io.on('connection', socket =>
   socket.on('disconnect', () =>
   {
     console.log('Dropped connection');
+    const current = socketsToPlayers.get(socket);
+    if (current != undefined)
+    {
+      players.delete(current);
+      playersToSockets.delete(current);
+      socketsToPlayers.delete(socket);
+      gameState.players = gameState.players.filter(e => e != current);
+      gameState.audience = gameState.audience.filter(e => e != current);
+      updateAll();
+    }
   });
 
   socket.on('login', (username, password) =>

@@ -4,7 +4,7 @@ var socket = null;
 var app = new Vue({
     el: '#game',
     data: {
-        me: { username: '', score: 0, state: 0, password: '' },
+        me: { username: 'test10', score: 0, state: 0, password: 'test10test' },
         state: { state: false },
         players: [],
         audience: [],

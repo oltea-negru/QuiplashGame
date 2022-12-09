@@ -1,4 +1,6 @@
-
+/* *{
+    border: 1px solid red;
+} */
 
 body {
     background-size: cover;
@@ -21,20 +23,14 @@ body {
 }
 .container {
     background-color: white;
-    width: 500px;
-    height: 300px;
-    margin: 0 auto;
-    padding: 20px;
+    padding: 30px;
+    width: 600px;
     border-radius: 10px;
     display: flex;
     flex-direction: column;
         justify-content: space-around;
         align-items: center;
         text-align: center;
-}
-
-h2{
-    width: 100px;
 }
 
 input{
@@ -44,6 +40,8 @@ input{
     border: 1px solid #ccc;
     padding: 10px;
     font-size: 16px;
+    margin-top: 10px;
+    margin-bottom: 10px;
 }
 
 button{
@@ -55,4 +53,30 @@ button{
     font-size: 16px;
     background-color: #ccc;
     cursor: pointer;
+    margin-bottom: 10px;
+}
+
+.waiting-room-title{
+    font-size: 24px;
+    font-weight: bold;
+    text-align: center;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+
+}
+
+.players_waiting{
+    font-size: 16px;
+    text-align: center;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    width: 300px;
+}
+
+.audience{
+    position: abosolute;
+    bottom: 0;
+
 }

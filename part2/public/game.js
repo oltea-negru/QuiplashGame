@@ -27,6 +27,12 @@ var app = new Vue({
         {
             this.me.state = state;
         },
+        startGame()
+        {
+            console.log('Start game from client');
+            socket.emit('startGame');
+        }
+
 
     }
 });

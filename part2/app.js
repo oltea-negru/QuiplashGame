@@ -158,6 +158,14 @@ io.on('connection', socket =>
     console.log('REgister!!!!');
     handleRegister(socket, username, password);
   });
+
+  socket.on('startGame', () =>
+  {
+    console.log('Start game from server');
+    console.log('Start game');
+    gameState.state = 1;
+    updateAll();
+  });
 });
 
 //Start server

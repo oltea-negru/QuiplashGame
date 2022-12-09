@@ -1,20 +1,25 @@
 <!doctype html>
 <html lang="en">
+    <div id="game" class="game">
+        <%- include('header'); -%>
 
-    <%- include('header'); -%>
+            <div v-if="me.state==0">
+                <%- include('login'); -%>
+            </div>
+            <div v-else-if="me.state==1">
+                <%- include('register'); -%>
+            </div>
+            <div v-else-if="me.state==2">
+                <h2 class="title">{{players}}</h2>
+                <h2 class="title">{{audience}}</h2>
+                <div>
+                    <div class="bg-primary d-inline-flex p-1  fixed-bottom justify-content-center">
+                        <p><strong>my state</strong>: {{me.state}} | <strong>game state</strong>:{{state}}</p>
+                    </div>
+                </div>
+            </div>
 
-    <h2 class="title">ECS Example Game</h2>
-
-    <div  id="game">
-        <div >
-            <p>my state: {{me.state}}</p>>
-            <p>game state:{{state.state}}</p>
-        </div>
-        <div>
-            <button v-on:click="reverseState">ReverseState</button>
-        </div>
+            <%- include('footer'); -%>
     </div>
-
-    <%- include('footer'); -%>
 
 </html>

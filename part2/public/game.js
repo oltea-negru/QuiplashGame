@@ -4,10 +4,10 @@ var socket = null;
 var app = new Vue({
     el: '#game',
     data: {
-        error: null,
-        me: { name: '', score: 0, state: 0 },
+        me: { username: '', score: 0, state: 0, password: '' },
         state: { state: false },
-        players: {},
+        players: [],
+        audience: [],
         chatmessage: '',
     },
     mounted: function ()
@@ -15,14 +15,19 @@ var app = new Vue({
         connect();
     },
     methods: {
-        handleStatus(state)
+        login()
         {
-            this.state.state = !state;
+            socket.emit('login', this.me.username, this.me.password);
         },
-        reverseState()
+        register()
         {
-            socket.emit('stateChange', this.state.state);
-        }
+            socket.emit('register', this.me.username, this.me.password);
+        },
+        changeMeState(state)
+        {
+            this.me.state = state;
+        },
+
     }
 });
 
@@ -51,16 +56,19 @@ function connect()
         app.state.state = false;
     });
 
-    // //Handle incoming chat message
-    // socket.on('chat', function (message)
-    // {
-    //     app.handleChat(message);
-    // });
-
-    socket.on('stateChange', function (state)
+    socket.on('error', function (res)
     {
-        app.handleStatus(state);
+        alert(res);
     });
+
+    socket.on('stateChange', function (res)
+    {
+        app.state = res.state;
+        app.players = res.players;
+        app.me = res.me;
+        app.audience = res.audience;
+    });
+
 
 
 }

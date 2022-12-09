@@ -1,30 +1,58 @@
+
+
 body {
-    background-image: url('/static/background.jpg');
     background-size: cover;
     background-repeat: no-repeat;
-    background-color: #acc5d0;
+    background-color: whitesmoke;
 }
+
+.game{
+    display: flex;
+        justify-content: center;
+        align-items: center;
+        text-align: center;
+        min-height: 100vh;
+}
+
 .title {
     font-weight: bold;
     font-size: 32px;
     text-align: center;
 }
 .container {
-    background-color: rgba(255,255,255,0.8);
-    padding-bottom: 10px;
-    padding-top: 10px;
-    height: 100vh;
+    background-color: white;
+    width: 500px;
+    height: 300px;
+    margin: 0 auto;
+    padding: 20px;
+    border-radius: 10px;
+    display: flex;
+    flex-direction: column;
+        justify-content: space-around;
+        align-items: center;
+        text-align: center;
 }
-#chat { 
-    list-style-type: none; 
-    margin: 0; 
-    padding: 0; 
-    overflow: auto;
-    max-height: 80vh;
+
+h2{
+    width: 100px;
 }
-#chat li { 
-    padding: 5px 10px; 
+
+input{
+    width: 300px;
+    height: 40px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    padding: 10px;
+    font-size: 16px;
 }
-#chat li:nth-child(odd) { 
-    background-color: rgba(0,0,0,0.2); 
+
+button{
+    width: 300px;
+    height: 40px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    padding: 10px;
+    font-size: 16px;
+    background-color: #ccc;
+    cursor: pointer;
 }

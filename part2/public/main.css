@@ -101,3 +101,9 @@ textarea{
     margin-bottom: 20px;
     text-align: center;
 }
+
+.login{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}

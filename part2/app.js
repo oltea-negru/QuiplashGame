@@ -169,6 +169,8 @@ async function handleCreatePrompt(socket, username, password, prompt)
     });
 }
 
+
+
 //Handle new connection
 io.on('connection', socket =>
 {
@@ -222,6 +224,8 @@ io.on('connection', socket =>
     }
     updateAll();
   });
+
+
 
 });
 

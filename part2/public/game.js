@@ -6,10 +6,11 @@ var app = new Vue({
     data: {
         error: '',
         me: { username: 'test10', score: 0, state: 0, password: 'test10test', prompt: '' },
-        gameState: { state: false, round: 0 },
+        gameState: { state: false, round: 0, prompt: '' },
         players: [],
         audience: [],
         clicked: false,
+        currentPrompt: ''
     },
     mounted: function ()
     {
@@ -30,7 +31,6 @@ var app = new Vue({
         },
         startGame()
         {
-            console.log('Start game from client');
             socket.emit('startGame');
         },
         createPrompt()
@@ -40,6 +40,10 @@ var app = new Vue({
         nextRound()
         {
             socket.emit('nextRound');
+        },
+        goToAnswers()
+        {
+            socket.emit('goToAnswers');
         }
     }
 });

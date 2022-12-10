@@ -2,5 +2,12 @@
     "CLOUD_SERVER":"https://coursework1-oin1u20.azurewebsites.net/api",
     "APP_KEY":"lfD1qAs4fD1Tf_xBNpaK_XuhkN097BwoWy0spJ5fVFm7AzFuUtg3zg==",
     "PLAYER_LOGIN":"/player/login",
-    "PLAYER_REGISTER":"/player/register"
+    "PLAYER_REGISTER":"/player/register",
+    "PROMPT_CREATE":"/prompt/create",
+    "PROMPT_DELETE":"/prompt/delete",
+    "PROMPTS_GET":"/prompts/get",
+    "PROMPT_EDIT":"/prompt/edit",
+    "PROMPTS_GET_TEXT":"/prompts/getText",
+    "PLAYER_TOP":"/player/leaderboard",
+    "PLAYER_UPDATE":"/player/update"
 }

@@ -4,11 +4,12 @@ var socket = null;
 var app = new Vue({
     el: '#game',
     data: {
-        me: { username: 'test10', score: 0, state: 0, password: 'test10test' },
-        state: { state: false },
+        error: '',
+        me: { username: 'test10', score: 0, state: 0, password: 'test10test', prompt: '' },
+        gameState: { state: false, round: 0 },
         players: [],
         audience: [],
-        chatmessage: '',
+        clicked: false,
     },
     mounted: function ()
     {
@@ -31,9 +32,15 @@ var app = new Vue({
         {
             console.log('Start game from client');
             socket.emit('startGame');
+        },
+        createPrompt()
+        {
+            socket.emit('createPrompt', this.me.username, this.me.password, this.me.prompt);
+        },
+        nextRound()
+        {
+            socket.emit('nextRound');
         }
-
-
     }
 });
 
@@ -45,7 +52,7 @@ function connect()
     //Connect
     socket.on('connect', function ()
     {
-        app.state.state = 0;
+        app.gameState.state = 0;
     });
 
     //Handle connection error
@@ -69,12 +76,17 @@ function connect()
 
     socket.on('stateChange', function (res)
     {
-        app.state = res.state;
+        app.gameState = res.state;
         app.players = res.players;
         app.me = res.me;
         app.audience = res.audience;
+        // app.error = res.error;
     });
 
-
+    socket.on('promptCreated', () =>
+    {
+        app.clicked = true;
+        app.me.prompt = '';
+    });
 
 }

@@ -1,23 +1,11 @@
-<div>
-    <div class="waiting_room_title">
+<div class="waiting_players">
+    <div>
         <h2>Waiting for players...</h2>
         <h4>{{players.length}}/8</h4>
     </div>
-    <div class="players_waiting">
-        <p v-for="player in players">
-            {{player}}
-        </p>
-    </div>
-    <div class="audience">
-        <div class="waiting_room_title">
-            <h2>Audience members</h2>
-        </div>
-        <div class="players_waiting">
-            <p v-for="player in audience">
-                {{player}}
-            </p>
-        </div>
-    </div>
+
+    <p class="player_card" v-for="player in players">
+        {{player}}</p>
 
     <div v-if="me.username==players[0]">
         <button v-on:click="startGame" class="btn btn-dark">Start game</button>
@@ -25,3 +13,13 @@
     <div v-else>
         <p>Only admin can start the game :(</p>
     </div>
+</div>
+
+<div class="waiting_audience">
+    <div>
+        <h2>Audience members</h2>
+    </div>
+    <p class="player_card bg-primary" v-for="player in audience">
+        {{player}}
+    </p>
+</div>

@@ -10,25 +10,28 @@
                 <%- include('register'); -%>
             </div>
             <div v-else-if="me.state==2">
-                <div v-if="state==0">
+                <div class="waiting_room" v-if="gameState.state==0">
                     <%- include('waiting_room') %>
                 </div>
-                <div v-else-if="state==1">
-                    <h2>In GAMEEEEEEE youre not</h2>
-                    <p v-for="player in audience">
-                        {{player}}
-                    </p>
+                <div class="in_game" v-else-if="gameState.state==1">
+                    <%- include('in_game') %>
                 </div>
-                <div v-else-if="state==2">
-                    <h2>Game over x</h2>
+                <div v-else-if="gameState.state==2">
+                    <h2>Results</h2>
                 </div>
-                <div>
-                    <div class="bg-primary d-inline-flex p-1  fixed-bottom justify-content-center">
-                        <p><strong>my state</strong>: {{me.state}} | <strong>game state</strong>:{{state}}</p>
-                    </div>
+                <div v-else-if="gameState.state==3">
+                    <h2>Scores</h2>
                 </div>
+                <div v-else-if="gameState.state==4">
+                    <h2>Game Over</h2>
+                </div>
+
             </div>
 
+
+            <div class="bg-primary d-inline-flex p-1  fixed-bottom justify-content-center">
+                <p><strong>my state: {{me.state}} | game state: {{gameState.state}}</strong></p>
+            </div>
 
 
 

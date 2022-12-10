@@ -5,17 +5,30 @@ const express = require('express');
 const app = express();
 const axios = require('axios');
 const config = require('./config.json');
+
+//Setup constants from config file
 const cloud_server = config.CLOUD_SERVER;
 const player_login = config.PLAYER_LOGIN;
 const player_register = config.PLAYER_REGISTER;
+const prompt_create_prompt = config.PROMPT_CREATE;
+const prompts_get = config.PROMPTS_GET;
+const prompt_delete = config.PROMPT_DELETE;
+const prompt_edit = config.PROMPT_EDIT;
+const prompt_get_text = config.PROMPTS_GET_TEXT;
+const player_top = config.PLAYER_TOP;
+const player_update = config.PLAYER_UPDATE;
 const key = config.APP_KEY;
 const headers = { 'x-functions-key': key };
+
+//Setup server side game state
+let players = new Map();
+let playersToSockets = new Map();
+let socketsToPlayers = new Map();
+let gameState = { state: 0, players: [], audience: [], round: 1 };
 
 //Setup socket.io
 const server = require('http').Server(app);
 const io = require('socket.io')(server);
-
-
 
 //Setup static page handling
 app.set('view engine', 'ejs');
@@ -47,7 +60,6 @@ function updateAll()
   console.log('Update all');
   for (let [player, socket] of playersToSockets)
   {
-    console.log('Socket ' + socket.id);
     updatePlayer(socket);
   }
 }
@@ -56,9 +68,15 @@ function updatePlayer(socket)
 {
   const current = socketsToPlayers.get(socket);
   const player = players.get(current);
-  const data = { state: gameState.state, players: gameState.players, audience: gameState.audience, me: player };
+  const data = {
+    state: { state: gameState.state, round: gameState.round },
+    players: gameState.players,
+    audience: gameState.audience,
+    me: player,
+    error: ''
+  };
+  console.log('Update player: ' + current);
   socket.emit('stateChange', data);
-
 }
 
 async function handleLogin(socket, username, password)
@@ -82,13 +100,13 @@ async function handleLogin(socket, username, password)
         {
           if (!gameState.players.includes(username))
             gameState.players.push(username);
-          players.set(username, { username: username, score: 0, state: 2, password: password });
+          players.set(username, { username: username, score: 0, state: 2, password: password, prompt: '' });
         }
         else if (gameState.players.length >= 2 || gameState.state > 0)
         {
           if (!gameState.audience.includes(username))
             gameState.audience.push(username);
-          players.set(username, { username: username, score: 0, state: 2, password: password });
+          players.set(username, { username: username, score: 0, state: 2, password: password, prompt: '' });
         }
         updateAll();
       }
@@ -131,10 +149,25 @@ async function handleRegister(socket, username, password)
 
 }
 
-let players = new Map();
-let playersToSockets = new Map();
-let socketsToPlayers = new Map();
-let gameState = { state: 0, players: [], audience: [] };
+async function handleCreatePrompt(socket, username, password, prompt)
+{
+  console.log('Create prompt: ' + prompt);
+  let res = await axios.post(cloud_server + prompt_create_prompt,
+    { "username": username, "password": password, "text": prompt },
+    { headers: headers })
+    .then((response) =>
+    {
+      console.log(response.data);
+      if (response.data.result == false)
+      {
+        socket.emit('error', response.data.msg)
+      }
+      else
+      {
+        socket.emit('promptCreated');
+      }
+    });
+}
 
 //Handle new connection
 io.on('connection', socket =>
@@ -159,23 +192,37 @@ io.on('connection', socket =>
 
   socket.on('login', (username, password) =>
   {
-    console.log('Login!!!!');
     handleLogin(socket, username, password);
   });
 
   socket.on('register', (username, password) =>
   {
-    console.log('REgister!!!!');
     handleRegister(socket, username, password);
   });
 
   socket.on('startGame', () =>
   {
-    console.log('Start game from server');
     console.log('Start game');
     gameState.state = 1;
     updateAll();
   });
+
+  socket.on('createPrompt', (username, password, prompt) =>
+  {
+    handleCreatePrompt(socket, username, password, prompt);
+  });
+
+  socket.on('nextRound', () =>
+  {
+    console.log('Next round');
+    gameState.round++;
+    if (gameState.round > 3)
+    {
+      gameState.state = 2;
+    }
+    updateAll();
+  });
+
 });
 
 //Start server

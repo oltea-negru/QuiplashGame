@@ -24,7 +24,7 @@ const headers = { 'x-functions-key': key };
 let players = new Map();
 let playersToSockets = new Map();
 let socketsToPlayers = new Map();
-let gameState = { state: 0, players: [], audience: [], round: 1 };
+let gameState = { state: 0, players: [], audience: [], round: 1, currentPrompts: [] };
 
 //Setup socket.io
 const server = require('http').Server(app);
@@ -73,13 +73,14 @@ function updatePlayer(socket)
     players: gameState.players,
     audience: gameState.audience,
     me: player,
-    error: ''
+    error: '',
+    prompt: ''
   };
   console.log('Update player: ' + current);
   socket.emit('stateChange', data);
 }
 
-async function handleLogin(socket, username, password)
+async function login(socket, username, password)
 {
   console.log('Login: ' + username + ' ' + password);
   let res = await axios.post(cloud_server + player_login,
@@ -100,13 +101,13 @@ async function handleLogin(socket, username, password)
         {
           if (!gameState.players.includes(username))
             gameState.players.push(username);
-          players.set(username, { username: username, score: 0, state: 2, password: password, prompt: '' });
+          players.set(username, { username: username, score: 0, state: 2, password: password });
         }
         else if (gameState.players.length >= 2 || gameState.state > 0)
         {
           if (!gameState.audience.includes(username))
             gameState.audience.push(username);
-          players.set(username, { username: username, score: 0, state: 2, password: password, prompt: '' });
+          players.set(username, { username: username, score: 0, state: 2, password: password });
         }
         updateAll();
       }
@@ -114,7 +115,7 @@ async function handleLogin(socket, username, password)
 
 }
 
-async function handleRegister(socket, username, password)
+async function register(socket, username, password)
 {
   console.log('Register: ' + username + ' ' + password);
   let res = await axios.post(cloud_server + player_register,
@@ -149,7 +150,7 @@ async function handleRegister(socket, username, password)
 
 }
 
-async function handleCreatePrompt(socket, username, password, prompt)
+async function createPrompt(socket, username, password, prompt)
 {
   console.log('Create prompt: ' + prompt);
   let res = await axios.post(cloud_server + prompt_create_prompt,
@@ -157,17 +158,37 @@ async function handleCreatePrompt(socket, username, password, prompt)
     { headers: headers })
     .then((response) =>
     {
-      console.log(response.data);
       if (response.data.result == false)
       {
         socket.emit('error', response.data.msg)
       }
       else
       {
+        // gameState.currentPrompts.push(prompt);
         socket.emit('promptCreated');
       }
     });
 }
+
+// async function answerPrompt()
+// {
+//   console.log('Prompt with answers: ' + prompt);
+//   let res = await axios.post(cloud_server + prompt_create_prompt,
+//     { "username": username, "password": password, "text": prompt },
+//     { headers: headers })
+//     .then((response) =>
+//     {
+//       if (response.data.result == false)
+//       {
+//         socket.emit('error', response.data.msg)
+//       }
+//       else
+//       {
+//         gameState.currentPrompts.push(prompt);
+//         socket.emit('promptCreated');
+//       }
+//     });
+// }
 
 
 
@@ -175,6 +196,23 @@ async function handleCreatePrompt(socket, username, password, prompt)
 io.on('connection', socket =>
 {
   console.log('New connection');
+
+  socket.on('login', (username, password) =>
+  {
+    login(socket, username, password);
+  });
+
+  socket.on('register', (username, password) =>
+  {
+    register(socket, username, password);
+  });
+
+  socket.on('startGame', () =>
+  {
+    console.log('Start game');
+    gameState.state = 1;
+    updateAll();
+  });
 
   //Handle disconnection
   socket.on('disconnect', () =>
@@ -192,27 +230,15 @@ io.on('connection', socket =>
     }
   });
 
-  socket.on('login', (username, password) =>
-  {
-    handleLogin(socket, username, password);
-  });
-
-  socket.on('register', (username, password) =>
-  {
-    handleRegister(socket, username, password);
-  });
-
-  socket.on('startGame', () =>
-  {
-    console.log('Start game');
-    gameState.state = 1;
-    updateAll();
-  });
-
   socket.on('createPrompt', (username, password, prompt) =>
   {
-    handleCreatePrompt(socket, username, password, prompt);
+    createPrompt(socket, username, password, prompt);
   });
+
+  // socket.on('answerPrompt', () =>
+  // {
+  //   answerPrompt();
+  // })
 
   socket.on('nextRound', () =>
   {

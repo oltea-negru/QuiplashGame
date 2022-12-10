@@ -5,12 +5,14 @@ var app = new Vue({
     el: '#game',
     data: {
         error: '',
-        me: { username: 'test10', score: 0, state: 0, password: 'test10test', prompt: '' },
+        me: { username: 'test10', score: 0, state: 0, password: 'test10test', },
         gameState: { state: false, round: 0, prompt: '' },
         players: [],
         audience: [],
         clicked: false,
-        currentPrompt: ''
+        prompt: '',
+        promptToAnswer: '',
+        answer: '',
     },
     mounted: function ()
     {
@@ -35,15 +37,15 @@ var app = new Vue({
         },
         createPrompt()
         {
-            socket.emit('createPrompt', this.me.username, this.me.password, this.me.prompt);
+            socket.emit('createPrompt', this.me.username, this.me.password, this.prompt);
         },
         nextRound()
         {
             socket.emit('nextRound');
         },
-        goToAnswers()
+        answerPrompt()
         {
-            socket.emit('goToAnswers');
+            socket.emit('answerPrompt');
         }
     }
 });
@@ -70,7 +72,7 @@ function connect()
     socket.on('disconnect', function ()
     {
         alert('Disconnected');
-        app.state.state = false;
+        app.gameState.state = false;
     });
 
     socket.on('error', function (res)
@@ -84,13 +86,14 @@ function connect()
         app.players = res.players;
         app.me = res.me;
         app.audience = res.audience;
-        // app.error = res.error;
+        app.error = res.error;
+        app.prompt = res.prompt;
     });
 
     socket.on('promptCreated', () =>
     {
         app.clicked = true;
-        app.me.prompt = '';
+        app.prompt = '';
     });
 
 }

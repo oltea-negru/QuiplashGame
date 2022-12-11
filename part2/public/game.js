@@ -12,7 +12,7 @@ var app = new Vue({
         clicked: false,
         prompt1: '',
         prompt2: '',
-        promptToAnswer: '',
+        prompt: '',
         answer1: '',
         answer2: '',
     },
@@ -117,6 +117,7 @@ function connect()
         {
             app.prompt2 = res;
         }
+        app.clicked = false;
 
         console.log(app.prompt1);
         console.log(app.prompt2);

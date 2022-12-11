@@ -25,6 +25,7 @@ let players = new Map();
 let playersToSockets = new Map();
 let socketsToPlayers = new Map();
 let playersToPromptsToAnswers = new Map();
+let promptsToAnswers = new Map();
 let currentPrompts = [];
 let currentPlayerPairs = [];
 let gameState = { state: 0, players: [], audience: [], round: 1 };
@@ -79,6 +80,7 @@ function updatePlayer(socket)
     error: '',
     prompt1: '',
     prompt2: '',
+    prompt: '',
     answer1: '',
     answer2: '',
   };
@@ -172,7 +174,7 @@ async function register(socket, username, password)
 
 }
 
-async function createPrompt(socket, username, password, prompt)
+async function handleCreatePrompt(socket, username, password, prompt)
 {
   console.log('Create prompt: ' + prompt);
   let res = await axios.post(cloud_server + prompt_create_prompt,
@@ -180,13 +182,13 @@ async function createPrompt(socket, username, password, prompt)
     { headers: headers })
     .then((response) =>
     {
+      console.log(response.data);
       if (response.data.result == false)
       {
         socket.emit('error', response.data.msg)
       }
       else
       {
-        // gameState.currentPrompts.push(prompt);
         socket.emit('promptCreated');
       }
     });
@@ -239,6 +241,7 @@ async function handleGetPrompts()
     aux.set(totalPrompts[i], '');
     playersToPromptsToAnswers.set(playerPairs[i][0], aux);
     playersToPromptsToAnswers.set(playerPairs[i][1], aux);
+    promptsToAnswers.set(totalPrompts[i], []);
   }
 
   console.log(playersToPromptsToAnswers);
@@ -263,10 +266,15 @@ function searchForArray(haystack, needle)
 
 function handleAnswer(username, answer, prompt)
 {
-  let promptToAnswer = new Map();
-  promptToAnswer.set(prompt, answer);
-  playersToPromptsToAnswers.set(username, promptToAnswer);
+  let aux = new Map();
+  aux.set(prompt, answer);
+  playersToPromptsToAnswers.set(username, aux);
   console.log(playersToPromptsToAnswers);
+
+  let aux2 = promptsToAnswers.get(prompt);
+  aux2.push(answer);
+  promptsToAnswers.set(prompt, aux2);
+  console.log(promptsToAnswers);
 }
 
 //Handle new connection
@@ -311,7 +319,7 @@ io.on('connection', socket =>
 
   socket.on('createPrompt', (username, password, prompt) =>
   {
-    createPrompt(socket, username, password, prompt);
+    handleCreatePrompt(socket, username, password, prompt);
   });
 
   socket.on('getPrompts', () =>

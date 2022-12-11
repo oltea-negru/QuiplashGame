@@ -10,7 +10,8 @@ var app = new Vue({
         players: [],
         audience: [],
         clicked: false,
-        prompt: '',
+        prompt1: '',
+        prompt2: '',
         promptToAnswer: '',
         answer: '',
     },
@@ -95,5 +96,20 @@ function connect()
         app.clicked = true;
         app.prompt = '';
     });
+
+    socket.on('promptToAnswer', function (res)
+    {
+        if (app.prompt1 == '')
+        {
+            app.prompt1 = res;
+        }
+        else
+        {
+            app.prompt2 = res;
+        }
+
+        console.log(app.prompt1);
+        console.log(app.prompt2);
+    })
 
 }

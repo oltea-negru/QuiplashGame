@@ -24,7 +24,7 @@ const headers = { 'x-functions-key': key };
 let players = new Map();
 let playersToSockets = new Map();
 let socketsToPlayers = new Map();
-let gameState = { state: 0, players: [], audience: [], round: 1, currentPrompts: [] };
+let gameState = { state: 0, players: [], audience: [], round: 1, currentPrompts: [], currentPlayerPairs: [] };
 
 //Setup socket.io
 const server = require('http').Server(app);
@@ -74,11 +74,25 @@ function updatePlayer(socket)
     audience: gameState.audience,
     me: player,
     error: '',
-    prompt: ''
+    prompt1: '',
+    prompt2: ''
   };
   console.log('Update player: ' + current);
   socket.emit('stateChange', data);
 }
+
+function updatePlayersPrompts(currentPrompts, currentPlayerPairs)
+{
+  for (let i = 0; i < currentPlayerPairs.length; i++)
+  {
+    let socket1 = playersToSockets.get(currentPlayerPairs[i][0]);
+    let socket2 = playersToSockets.get(currentPlayerPairs[i][1]);
+
+    socket1.emit('promptToAnswer', currentPrompts[i]);
+    socket2.emit('promptToAnswer', currentPrompts[i]);
+  }
+}
+
 
 async function login(socket, username, password)
 {
@@ -205,6 +219,12 @@ async function handleGetPrompts()
   }
   console.log(playerPairs);
   console.log('Total prompts: ', totalPrompts);
+
+  // gameState.currentPrompts = totalPrompts;
+  // gameState.currentPlayerPairs = playerPairs;
+
+  updatePlayersPrompts(totalPrompts, playerPairs);
+
 }
 
 function searchForArray(haystack, needle)
@@ -223,8 +243,6 @@ function searchForArray(haystack, needle)
   return -1;
 }
 
-
-
 //Handle new connection
 io.on('connection', socket =>
 {
@@ -233,6 +251,7 @@ io.on('connection', socket =>
   socket.on('login', (username, password) =>
   {
     login(socket, username, password);
+
   });
 
   socket.on('register', (username, password) =>

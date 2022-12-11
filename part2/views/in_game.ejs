@@ -9,4 +9,4 @@
     <textarea v-model="prompt" class="form-control z-depth-1" placeholder="Write something here..."></textarea>
     <button v-on:click="createPrompt()" class="btn btn-dark">Submit</button>
 </div>
-<button v-if="me.username==players[0]" v-on:click="answerPrompt()" class="btn btn-dark">Answers Battle?</button>
+<button v-if="me.username==players[0]" v-on:click="getPrompts()" class="btn btn-dark">Answers Battle?</button>

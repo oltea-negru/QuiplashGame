@@ -43,9 +43,9 @@ var app = new Vue({
         {
             socket.emit('nextRound');
         },
-        answerPrompt()
+        getPrompts()
         {
-            socket.emit('answerPrompt');
+            socket.emit('getPrompts');
         }
     }
 });

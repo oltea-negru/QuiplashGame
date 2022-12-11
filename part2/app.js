@@ -97,13 +97,13 @@ async function login(socket, username, password)
         playersToSockets.set(username, socket);
         socketsToPlayers.set(socket, username);
 
-        if (gameState.players.length < 2 && gameState.state == 0)
+        if (gameState.players.length < 3 && gameState.state == 0)
         {
           if (!gameState.players.includes(username))
             gameState.players.push(username);
           players.set(username, { username: username, score: 0, state: 2, password: password });
         }
-        else if (gameState.players.length >= 2 || gameState.state > 0)
+        else if (gameState.players.length >= 3 || gameState.state > 0)
         {
           if (!gameState.audience.includes(username))
             gameState.audience.push(username);
@@ -132,13 +132,13 @@ async function register(socket, username, password)
         playersToSockets.set(username, socket);
         socketsToPlayers.set(socket, username);
 
-        if (gameState.players.length < 2 && gameState.state == 0)
+        if (gameState.players.length < 3 && gameState.state == 0)
         {
           if (!gameState.players.includes(username))
             gameState.players.push(username);
           players.set(username, { username: username, score: 0, state: 2, password: password });
         }
-        else if (gameState.players.length >= 2 || gameState.state > 0)
+        else if (gameState.players.length >= 3 || gameState.state > 0)
         {
           if (!gameState.audience.includes(username))
             gameState.audience.push(username);
@@ -170,25 +170,58 @@ async function createPrompt(socket, username, password, prompt)
     });
 }
 
-// async function answerPrompt()
-// {
-//   console.log('Prompt with answers: ' + prompt);
-//   let res = await axios.post(cloud_server + prompt_create_prompt,
-//     { "username": username, "password": password, "text": prompt },
-//     { headers: headers })
-//     .then((response) =>
-//     {
-//       if (response.data.result == false)
-//       {
-//         socket.emit('error', response.data.msg)
-//       }
-//       else
-//       {
-//         gameState.currentPrompts.push(prompt);
-//         socket.emit('promptCreated');
-//       }
-//     });
-// }
+async function handleGetPrompts()
+{
+  let totalPrompts = [];
+  var numberOfPrompts = gameState.players.length % 2 == 1 ? gameState.players.length : gameState.players.length / 2;
+
+  let res = await axios.post(cloud_server + prompts_get,
+    {
+      "prompts": numberOfPrompts
+    },
+    { headers: headers }).then((response) =>
+    {
+      response.data.forEach((prompt) => totalPrompts.push(prompt.text));
+    });
+
+  console.log(totalPrompts);
+  let playerPairs = [];
+  for (let i = 0; i < totalPrompts.length; i++)
+  {
+    playerPairs.push([]);
+  }
+
+  for (let i = 0; i < totalPrompts.length; i++)
+  {
+    let randomIndex = Math.floor(Math.random() * gameState.players.length);
+    while (searchForArray(playerPairs, [gameState.players[randomIndex], gameState.players[i]]) != -1 ||
+      randomIndex == i
+    )
+    {
+      randomIndex = Math.floor(Math.random() * gameState.players.length);
+    }
+    playerPairs[i].push(gameState.players[i]);
+    playerPairs[i].push(gameState.players[randomIndex]);
+  }
+  console.log(playerPairs);
+  console.log('Total prompts: ', totalPrompts);
+}
+
+function searchForArray(haystack, needle)
+{
+  var i, j, current;
+  for (i = 0; i < haystack.length; ++i)
+  {
+    if (needle.length === haystack[i].length)
+    {
+      current = haystack[i];
+      for (j = 0; j < needle.length && needle[j] === current[j]; ++j);
+      if (j === needle.length)
+        return i;
+    }
+  }
+  return -1;
+}
 
 
 
@@ -228,6 +261,7 @@ io.on('connection', socket =>
       gameState.audience = gameState.audience.filter(e => e != current);
       updateAll();
     }
+
   });
 
   socket.on('createPrompt', (username, password, prompt) =>
@@ -235,10 +269,10 @@ io.on('connection', socket =>
     createPrompt(socket, username, password, prompt);
   });
 
-  // socket.on('answerPrompt', () =>
-  // {
-  //   answerPrompt();
-  // })
+  socket.on('getPrompts', () =>
+  {
+    handleGetPrompts();
+  })
 
   socket.on('nextRound', () =>
   {

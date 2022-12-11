@@ -24,7 +24,10 @@ const headers = { 'x-functions-key': key };
 let players = new Map();
 let playersToSockets = new Map();
 let socketsToPlayers = new Map();
-let gameState = { state: 0, players: [], audience: [], round: 1, currentPrompts: [], currentPlayerPairs: [] };
+let playersToPromptsToAnswers = new Map();
+let currentPrompts = [];
+let currentPlayerPairs = [];
+let gameState = { state: 0, players: [], audience: [], round: 1 };
 
 //Setup socket.io
 const server = require('http').Server(app);
@@ -75,7 +78,9 @@ function updatePlayer(socket)
     me: player,
     error: '',
     prompt1: '',
-    prompt2: ''
+    prompt2: '',
+    answer1: '',
+    answer2: '',
   };
   console.log('Update player: ' + current);
   socket.emit('stateChange', data);
@@ -91,6 +96,9 @@ function updatePlayersPrompts(currentPrompts, currentPlayerPairs)
     socket1.emit('promptToAnswer', currentPrompts[i]);
     socket2.emit('promptToAnswer', currentPrompts[i]);
   }
+
+  gameState.state++;
+  updateAll();
 }
 
 
@@ -220,10 +228,20 @@ async function handleGetPrompts()
   console.log(playerPairs);
   console.log('Total prompts: ', totalPrompts);
 
-  // gameState.currentPrompts = totalPrompts;
-  // gameState.currentPlayerPairs = playerPairs;
+  currentPrompts = totalPrompts;
+  currentPlayerPairs = playerPairs;
 
   updatePlayersPrompts(totalPrompts, playerPairs);
+
+  for (let i = 0; i < totalPrompts.length; i++)
+  {
+    let aux = new Map();
+    aux.set(totalPrompts[i], '');
+    playersToPromptsToAnswers.set(playerPairs[i][0], aux);
+    playersToPromptsToAnswers.set(playerPairs[i][1], aux);
+  }
+
+  console.log(playersToPromptsToAnswers);
 
 }
 
@@ -241,6 +259,14 @@ function searchForArray(haystack, needle)
     }
   }
   return -1;
+}
+
+function handleAnswer(username, answer, prompt)
+{
+  let promptToAnswer = new Map();
+  promptToAnswer.set(prompt, answer);
+  playersToPromptsToAnswers.set(username, promptToAnswer);
+  console.log(playersToPromptsToAnswers);
 }
 
 //Handle new connection
@@ -291,7 +317,18 @@ io.on('connection', socket =>
   socket.on('getPrompts', () =>
   {
     handleGetPrompts();
-  })
+  });
+
+  socket.on('submitAnswer', (username, answer, prompt) =>
+  {
+    handleAnswer(username, answer, prompt);
+  });
+
+  socket.on('vote', () =>
+  {
+    gameState.state = 3;
+    updateAll();
+  });
 
   socket.on('nextRound', () =>
   {

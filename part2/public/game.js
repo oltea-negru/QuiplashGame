@@ -13,7 +13,8 @@ var app = new Vue({
         prompt1: '',
         prompt2: '',
         promptToAnswer: '',
-        answer: '',
+        answer1: '',
+        answer2: '',
     },
     mounted: function ()
     {
@@ -47,7 +48,16 @@ var app = new Vue({
         getPrompts()
         {
             socket.emit('getPrompts');
+        },
+        submitAnswer()
+        {
+            socket.emit('submitAnswer', this.me.username, this.answer1, this.prompt1);
+        },
+        vote()
+        {
+            socket.emit('vote');
         }
+
     }
 });
 

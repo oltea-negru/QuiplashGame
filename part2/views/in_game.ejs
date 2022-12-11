@@ -1,12 +1,38 @@
-<h2>Player: {{me.username}}</h2>
-<h3>Write something funny aka prompt </h3>
-<h4>Round {{gameState.round}}/3</h4>
+<div v-if="gameState.state==1">
+    <h2>Player: {{me.username}}</h2>
+    <h3>Write something funny aka prompt </h3>
+    <h4>Round {{gameState.round}}/3</h4>
 
-<div v-if="clicked==true">
-    <p>Waiting for other players to finish their prompts</p>
+    <div v-if="clicked==true">
+        <p>Waiting for other players to finish their prompts</p>
+    </div>
+    <div v-else class="form-group shadow-textarea">
+        <textarea v-model="prompt" class="form-control z-depth-1" placeholder="Write something here..."></textarea>
+        <button v-on:click="createPrompt()" class="btn btn-dark">Submit</button>
+    </div>
+    <button v-if="me.username==players[0]" v-on:click="getPrompts()" class="btn btn-dark">Answers Battle?</button>
 </div>
-<div v-else class="form-group shadow-textarea">
-    <textarea v-model="prompt" class="form-control z-depth-1" placeholder="Write something here..."></textarea>
-    <button v-on:click="createPrompt()" class="btn btn-dark">Submit</button>
+<div v-else-if="gameState.state==2">
+    <div v-if="!audience.includes(me.username)">
+        <h2>Player: {{me.username}}</h2>
+        <h3>Answer this prompt {{prompt1}} </h3>
+        <h4>Round {{gameState.round}}/3</h4>
+
+        <div v-if="clicked==true">
+            <p>Others need to finish their answers</p>
+        </div>
+        <div v-else class="form-group shadow-textarea">
+            <textarea v-model="answer1" class="form-control z-depth-1" placeholder="Write something here..."></textarea>
+            <button v-on:click="submitAnswer()" class="btn btn-dark">Submit</button>
+        </div>
+        <button v-if="me.username==players[0]" v-on:click="vote()" class="btn btn-dark">Voting Time</button>
+    </div>
+    <div v-else>
+        <h3>Players are coming up with funny answers!
+            <br> Sit back and enjoy the show!
+        </h3>
+    </div>
 </div>
-<button v-if="me.username==players[0]" v-on:click="getPrompts()" class="btn btn-dark">Answers Battle?</button>
+<div v-else>
+    <h1>Votes</h1>
+</div>

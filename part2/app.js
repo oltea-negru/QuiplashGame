@@ -28,7 +28,8 @@ let playersToPromptsToAnswers = new Map();
 let promptsToAnswers = new Map();
 let currentPrompts = [];
 let currentPlayerPairs = [];
-let gameState = { state: 0, players: [], audience: [], round: 1 };
+let currentAnswers = [];
+let gameState = { state: 0, players: [], audience: [], round: 1, currentPrompts: [], currentPlayerPairs: [], currentAnswers: [] };
 
 //Setup socket.io
 const server = require('http').Server(app);
@@ -73,7 +74,7 @@ function updatePlayer(socket)
   const current = socketsToPlayers.get(socket);
   const player = players.get(current);
   const data = {
-    state: { state: gameState.state, round: gameState.round },
+    state: gameState,
     players: gameState.players,
     audience: gameState.audience,
     me: player,
@@ -125,13 +126,13 @@ async function login(socket, username, password)
         {
           if (!gameState.players.includes(username))
             gameState.players.push(username);
-          players.set(username, { username: username, score: 0, state: 2, password: password });
+          players.set(username, { username: username, score: 0, state: 2, password: password, voteIndex: 0 });
         }
         else if (gameState.players.length >= 3 || gameState.state > 0)
         {
           if (!gameState.audience.includes(username))
             gameState.audience.push(username);
-          players.set(username, { username: username, score: 0, state: 2, password: password });
+          players.set(username, { username: username, score: 0, state: 2, password: password, voteIndex: 0 });
         }
         updateAll();
       }
@@ -269,12 +270,45 @@ function handleAnswer(username, answer, prompt)
   let aux = new Map();
   aux.set(prompt, answer);
   playersToPromptsToAnswers.set(username, aux);
-  console.log(playersToPromptsToAnswers);
+  console.log(playersToPromptsToAnswers, "playersToPromptsToAnswers");
 
   let aux2 = promptsToAnswers.get(prompt);
   aux2.push(answer);
   promptsToAnswers.set(prompt, aux2);
-  console.log(promptsToAnswers);
+  console.log(promptsToAnswers, "promptsToAnswers");
+  console.log(playersToPromptsToAnswers, "playersToPromptsToAnswers");
+
+}
+
+function handleVoting()
+{
+  for (let prompt of currentPrompts)
+  {
+    let answers = promptsToAnswers.get(prompt);
+    currentAnswers.push(answers);
+  }
+  gameState.state = 3;
+  gameState.currentPrompts = currentPrompts;
+  gameState.currentPlayerPairs = currentPlayerPairs;
+  gameState.currentAnswers = currentAnswers;
+
+  updateAll();
+}
+
+function handleVote(socket, player)
+{
+  let data = players.get(player);
+  data.score += gameState.round * 100;
+  players.set(player, data);
+  let notifySocket = playersToSockets.get(player);
+  updatePlayer(notifySocket);
+
+  let socketPlayer = socketsToPlayers.get(socket);
+  let data2 = players.get(socketPlayer);
+  data2.voteIndex++;
+  players.set(socketPlayer, data2);
+  updatePlayer(socket);
+
 }
 
 //Handle new connection
@@ -334,8 +368,7 @@ io.on('connection', socket =>
 
   socket.on('vote', () =>
   {
-    gameState.state = 3;
-    updateAll();
+    handleVoting();
   });
 
   socket.on('nextRound', () =>
@@ -349,7 +382,10 @@ io.on('connection', socket =>
     updateAll();
   });
 
-
+  socket.on("voteFor", (player) =>
+  {
+    handleVote(socket, player);
+  });
 
 });
 

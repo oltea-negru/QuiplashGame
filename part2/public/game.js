@@ -5,13 +5,13 @@ var app = new Vue({
     el: '#game',
     data: {
         error: '',
-        me: { username: 'test10', score: 0, state: 0, password: 'test10test', },
-        gameState: { state: false, round: 0, prompt: '' },
+        me: { username: 'test10', score: 0, state: 0, password: 'test10test', voteIndex: 0 },
+        gameState: { state: false, round: 0, currentPrompts: [], currentAnswers: [], currentPlayerPairs: [] },
         players: [],
         audience: [],
-        clicked: false,
         prompt1: '',
         prompt2: '',
+        clicked: false,
         prompt: '',
         answer1: '',
         answer2: '',
@@ -52,10 +52,19 @@ var app = new Vue({
         submitAnswer()
         {
             socket.emit('submitAnswer', this.me.username, this.answer1, this.prompt1);
+            this.prompt1 = this.prompt2;
+            this.answer1 = this.answer2;
+            this.prompt2 = '';
         },
         vote()
         {
             socket.emit('vote');
+        },
+        voteFor(answer)
+        {
+            let index = this.gameState.currentAnswers[this.me.voteIndex].indexOf(answer);
+            let player = this.gameState.currentPlayerPairs[this.me.voteIndex][index];
+            socket.emit('voteFor', player);
         }
 
     }
@@ -121,6 +130,6 @@ function connect()
 
         console.log(app.prompt1);
         console.log(app.prompt2);
-    })
+    });
 
 }

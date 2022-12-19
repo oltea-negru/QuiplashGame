@@ -6,7 +6,7 @@ var app = new Vue({
     data: {
         error: '',
         me: { username: 'test10', score: 0, state: 0, password: 'test10test', voteIndex: 0 },
-        gameState: { state: false, round: 0, currentPrompts: [], currentAnswers: [], currentPlayerPairs: [] },
+        gameState: { state: false, round: 0, currentPrompts: [], currentAnswers: [] },
         players: [],
         audience: [],
         prompt1: '',
@@ -62,9 +62,11 @@ var app = new Vue({
         },
         voteFor(answer)
         {
-            let index = this.gameState.currentAnswers[this.me.voteIndex].indexOf(answer);
-            let player = this.gameState.currentPlayerPairs[this.me.voteIndex][index];
-            socket.emit('voteFor', player);
+            socket.emit('voteFor', this.gameState.currentPrompts[this.me.voteIndex], answer);
+        },
+        seeScores()
+        {
+            socket.emit('seeScores');
         }
 
     }
@@ -127,9 +129,6 @@ function connect()
             app.prompt2 = res;
         }
         app.clicked = false;
-
-        console.log(app.prompt1);
-        console.log(app.prompt2);
     });
 
 }

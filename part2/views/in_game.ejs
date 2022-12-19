@@ -44,6 +44,7 @@
         </div>
         <div v-else>
             <h1>Waiting for other players to vote</h1>
+            <button v-on:click="seeScores()" class="btn btn-dark">See Results</button>
         </div>
     </div>
     <div v-else>

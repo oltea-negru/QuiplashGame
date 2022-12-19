@@ -29,7 +29,7 @@ let promptsToAnswers = new Map();
 let currentPrompts = [];
 let currentPlayerPairs = [];
 let currentAnswers = [];
-let gameState = { state: 0, players: [], audience: [], round: 1, currentPrompts: [], currentPlayerPairs: [], currentAnswers: [] };
+let gameState = { state: 0, players: [], audience: [], round: 1, currentPrompts: [], currentAnswers: [] };
 
 //Setup socket.io
 const server = require('http').Server(app);
@@ -183,7 +183,7 @@ async function handleCreatePrompt(socket, username, password, prompt)
     { headers: headers })
     .then((response) =>
     {
-      console.log(response.data);
+
       if (response.data.result == false)
       {
         socket.emit('error', response.data.msg)
@@ -209,7 +209,6 @@ async function handleGetPrompts()
       response.data.forEach((prompt) => totalPrompts.push(prompt.text));
     });
 
-  console.log(totalPrompts);
   let playerPairs = [];
   for (let i = 0; i < totalPrompts.length; i++)
   {
@@ -228,7 +227,6 @@ async function handleGetPrompts()
     playerPairs[i].push(gameState.players[i]);
     playerPairs[i].push(gameState.players[randomIndex]);
   }
-  console.log(playerPairs);
   console.log('Total prompts: ', totalPrompts);
 
   currentPrompts = totalPrompts;
@@ -239,13 +237,22 @@ async function handleGetPrompts()
   for (let i = 0; i < totalPrompts.length; i++)
   {
     let aux = new Map();
-    aux.set(totalPrompts[i], '');
+    if (playersToPromptsToAnswers.has(playerPairs[i][0]))
+      aux = playersToPromptsToAnswers.get(playerPairs[i][0]);
+    aux.set(totalPrompts[i], "");
+
+    let aux2 = new Map();
+    if (playersToPromptsToAnswers.has(playerPairs[i][1]))
+      aux2 = playersToPromptsToAnswers.get(playerPairs[i][1]);
+    aux2.set(totalPrompts[i], "");
+
     playersToPromptsToAnswers.set(playerPairs[i][0], aux);
-    playersToPromptsToAnswers.set(playerPairs[i][1], aux);
+    playersToPromptsToAnswers.set(playerPairs[i][1], aux2);
+
     promptsToAnswers.set(totalPrompts[i], []);
   }
 
-  console.log(playersToPromptsToAnswers);
+  console.log('Players to prompts to answers: ', playersToPromptsToAnswers);
 
 }
 
@@ -267,16 +274,16 @@ function searchForArray(haystack, needle)
 
 function handleAnswer(username, answer, prompt)
 {
-  let aux = new Map();
+  let aux = playersToPromptsToAnswers.get(username);
   aux.set(prompt, answer);
   playersToPromptsToAnswers.set(username, aux);
-  console.log(playersToPromptsToAnswers, "playersToPromptsToAnswers");
+  console.log(playersToPromptsToAnswers, "playersToPromptsToAnswers from handleANswer");
+
 
   let aux2 = promptsToAnswers.get(prompt);
   aux2.push(answer);
   promptsToAnswers.set(prompt, aux2);
-  console.log(promptsToAnswers, "promptsToAnswers");
-  console.log(playersToPromptsToAnswers, "playersToPromptsToAnswers");
+  console.log(promptsToAnswers, "promptsToAnswers from handleANswer");
 
 }
 
@@ -289,18 +296,42 @@ function handleVoting()
   }
   gameState.state = 3;
   gameState.currentPrompts = currentPrompts;
-  gameState.currentPlayerPairs = currentPlayerPairs;
   gameState.currentAnswers = currentAnswers;
 
   updateAll();
 }
 
-function handleVote(socket, player)
+function handleVote(socket, prompt, answer)
 {
+  let aux = new Map();
+  aux.set(prompt, answer);
+  var player = null;
+  console.log(aux, "aux");
+  console.log(playersToPromptsToAnswers, "players to prompts to answers");
+
+  for (let [key, value] of playersToPromptsToAnswers)
+  {
+    console.log(value, "MAp of prompts of", key);
+    for (let [key2, value2] of value)
+    {
+      console.log(key2, value2, "prompt and answer");
+      console.log(key2 == prompt, "comparing")
+      if (key2 == prompt && value2 == answer)
+      {
+        console.log("Found player", key);
+        player = key;
+        break;
+      }
+    }
+
+  }
+
+  console.log("Incresing score of player: ", player, " by ", gameState.round * 100);
   let data = players.get(player);
   data.score += gameState.round * 100;
   players.set(player, data);
   let notifySocket = playersToSockets.get(player);
+  console.log("New score", data.score, "for player", player);
   updatePlayer(notifySocket);
 
   let socketPlayer = socketsToPlayers.get(socket);
@@ -382,10 +413,17 @@ io.on('connection', socket =>
     updateAll();
   });
 
-  socket.on("voteFor", (player) =>
+  socket.on("voteFor", (prompt, answer) =>
   {
-    handleVote(socket, player);
+    handleVote(socket, prompt, answer);
   });
+
+  socket.on("seeScores", () =>
+  {
+    let results = players.forEach((value, key) => { results.push(value.score) });
+    console.log(results);
+    socket.emit("scores", results);
+  })
 
 });
 

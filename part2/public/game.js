@@ -6,13 +6,14 @@ var app = new Vue({
     data: {
         error: '',
         me: { username: 'test10', score: 0, state: 0, password: 'test10test', voteIndex: 0 },
-        gameState: { state: false, round: 0, currentPrompts: [], currentAnswers: [], currentPlayerPairs: [] },
+        gameState: { state: false, round: 0, currentPrompts: [], currentAnswers: [], currentPlayerPairs: [], whoAnswered: [], voteCount: [] },
         players: [],
         audience: [],
         prompt1: '',
         prompt2: '',
         clicked: false,
         prompt: '',
+        answer: '',
         answer1: '',
         answer2: '',
     },
@@ -60,13 +61,24 @@ var app = new Vue({
         {
             socket.emit('vote');
         },
-        voteFor(answer)
+        voteFor()
         {
-            socket.emit('voteFor', this.gameState.currentPrompts[this.me.voteIndex], answer);
+            console.log(this.clicked);
+            this.clicked = true;
+            console.log(this.clicked);
+            socket.emit('voteFor', this.gameState.currentPrompts[this.me.voteIndex], this.answer);
         },
         seeScores()
         {
             socket.emit('seeScores');
+        },
+        selectAnswer(answer)
+        {
+            this.answer = answer;
+        },
+        next()
+        {
+            socket.emit('next');
         }
 
     }
@@ -110,6 +122,7 @@ function connect()
         app.audience = res.audience;
         app.error = res.error;
         app.prompt = res.prompt;
+
     });
 
     socket.on('promptCreated', () =>

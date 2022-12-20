@@ -26,10 +26,24 @@ let playersToSockets = new Map();
 let socketsToPlayers = new Map();
 let playersToPromptsToAnswers = new Map();
 let promptsToAnswers = new Map();
+let promptsToPlayersToVotes = new Map();
 let currentPrompts = [];
 let currentPlayerPairs = [];
 let currentAnswers = [];
-let gameState = { state: 0, players: [], audience: [], round: 1, currentPrompts: [], currentAnswers: [], currentPlayerPairs: [] };
+let whoAnswered = [];
+let voteCount = [];
+
+let gameState = {
+  state: 0,
+  players: [],
+  audience: [],
+  round: 1,
+  currentPrompts: [],
+  currentAnswers: [],
+  currentPlayerPairs: [],
+  voteCount: [],
+  whoAnswered: []
+};
 
 //Setup socket.io
 const server = require('http').Server(app);
@@ -82,6 +96,7 @@ function updatePlayer(socket)
     prompt1: '',
     prompt2: '',
     prompt: '',
+    answer: '',
     answer1: '',
     answer2: '',
   };
@@ -103,7 +118,6 @@ function updatePlayersPrompts(currentPrompts, currentPlayerPairs)
   gameState.state++;
   updateAll();
 }
-
 
 async function login(socket, username, password)
 {
@@ -175,7 +189,7 @@ async function register(socket, username, password)
 
 }
 
-async function handleCreatePrompt(socket, username, password, prompt)
+async function createPrompt(socket, username, password, prompt)
 {
   console.log('Create prompt: ' + prompt);
   let res = await axios.post(cloud_server + prompt_create_prompt,
@@ -195,10 +209,12 @@ async function handleCreatePrompt(socket, username, password, prompt)
     });
 }
 
-async function handleGetPrompts()
+async function getPrompts()
 {
   let totalPrompts = [];
   var numberOfPrompts = gameState.players.length % 2 == 1 ? gameState.players.length : gameState.players.length / 2;
+
+  console.log('Get prompts: ' + numberOfPrompts);
 
   let res = await axios.post(cloud_server + prompts_get,
     {
@@ -213,6 +229,8 @@ async function handleGetPrompts()
   for (let i = 0; i < totalPrompts.length; i++)
   {
     playerPairs.push([]);
+    whoAnswered.push([]);
+    voteCount.push([]);
   }
 
   for (let i = 0; i < totalPrompts.length; i++)
@@ -250,9 +268,9 @@ async function handleGetPrompts()
     playersToPromptsToAnswers.set(playerPairs[i][1], aux2);
 
     promptsToAnswers.set(totalPrompts[i], []);
-  }
 
-  console.log('Players to prompts to answers: ', playersToPromptsToAnswers);
+    console.log(playerPairs);
+  }
 
 }
 
@@ -277,13 +295,19 @@ function handleAnswer(username, answer, prompt)
   let aux = playersToPromptsToAnswers.get(username);
   aux.set(prompt, answer);
   playersToPromptsToAnswers.set(username, aux);
-  console.log(playersToPromptsToAnswers, "playersToPromptsToAnswers from handleANswer");
-
 
   let aux2 = promptsToAnswers.get(prompt);
   aux2.push(answer);
   promptsToAnswers.set(prompt, aux2);
-  console.log(promptsToAnswers, "promptsToAnswers from handleANswer");
+
+  let aux3 = new Map();
+  if (promptsToPlayersToVotes.has(prompt))
+    aux3 = promptsToPlayersToVotes.get(prompt);
+
+  aux3.set(username, 0);
+  promptsToPlayersToVotes.set(prompt, aux3);
+
+  console.log(promptsToPlayersToVotes, "promptToPlayersToVotes");
 
 }
 
@@ -294,52 +318,99 @@ function handleVoting()
     let answers = promptsToAnswers.get(prompt);
     currentAnswers.push(answers);
   }
+
+  console.log(currentAnswers, "currentAnswers form");
+
+  for (let i = 0; i < currentAnswers.length; i++)
+  {
+    let aux = currentAnswers[i];
+    let temp = currentPrompts[i];
+    let players = [];
+    let votes = [];
+    for (let answer of aux)
+    {
+      for (let [key, value] of playersToPromptsToAnswers)
+      {
+        for (let [key2, value2] of value)
+        {
+          if (key2 == temp && value2 == answer)
+          {
+            let aux = promptsToPlayersToVotes.get(temp);
+            let aux2 = aux.get(key);
+            votes.push(aux2);
+            players.push(key);
+            break;
+          }
+        }
+      }
+    }
+    whoAnswered[i] = players;
+    voteCount[i] = votes;
+    console.log(whoAnswered, "whoAnswered ");
+    console.log(voteCount, "voteCount ");
+  }
+
   gameState.state = 3;
   gameState.currentPrompts = currentPrompts;
   gameState.currentAnswers = currentAnswers;
   gameState.currentPlayerPairs = currentPlayerPairs;
+  gameState.whoAnswered = whoAnswered;
+  gameState.voteCount = voteCount;
 
   updateAll();
 }
 
 function handleVote(socket, prompt, answer)
 {
-  let aux = new Map();
-  aux.set(prompt, answer);
   var player = null;
-  console.log(aux, "aux");
-  console.log(playersToPromptsToAnswers, "players to prompts to answers");
 
   for (let [key, value] of playersToPromptsToAnswers)
   {
-    console.log(value, "MAp of prompts of", key);
     for (let [key2, value2] of value)
     {
-      console.log(key2, value2, "prompt and answer");
-      console.log(key2 == prompt, "comparing")
       if (key2 == prompt && value2 == answer)
       {
-        console.log("Found player", key);
         player = key;
         break;
       }
     }
-
   }
+
+  let aux = promptsToPlayersToVotes.get(prompt);
+  let votes = aux.get(player);
+  votes++;
+  aux.set(player, votes);
+  promptsToPlayersToVotes.set(prompt, aux);
+
+  console.log(gameState.voteCount, "gameState.voteCount beeeeeeeeeeeeeeeeefore");
+
+  for (let i = 0; i < gameState.whoAnswered.length; i++)
+  {
+    if (gameState.whoAnswered[i].includes(player) && gameState.currentPrompts[i] == prompt)
+    {
+      if (gameState.whoAnswered[i][0] == player)
+      {
+        for (let [key, value] of promptsToPlayersToVotes.get(prompt))
+          if (key == player)
+            gameState.voteCount[i][0] = value;
+      }
+      else if (gameState.whoAnswered[i][1] == player)
+      {
+        for (let [key, value] of promptsToPlayersToVotes.get(prompt))
+          if (key == player)
+            gameState.voteCount[i][1] = value;
+      }
+    }
+  }
+
+  console.log(gameState.voteCount, "gameState.voteCount afterrrrrrrrrrrrrrrrrrr");
 
   console.log("Incresing score of player: ", player, " by ", gameState.round * 100);
   let data = players.get(player);
   data.score += gameState.round * 100;
   players.set(player, data);
-  let notifySocket = playersToSockets.get(player);
   console.log("New score", data.score, "for player", player);
-  updatePlayer(notifySocket);
-
-  let socketPlayer = socketsToPlayers.get(socket);
-  let data2 = players.get(socketPlayer);
-  data2.voteIndex++;
-  players.set(socketPlayer, data2);
-  updatePlayer(socket);
+  updateAll();
 
 }
 
@@ -362,13 +433,13 @@ io.on('connection', socket =>
   socket.on('startGame', () =>
   {
     console.log('Start game');
-    // if (gameState.players.length < 3)
-    //   socket.emit('error', 'Not enough players! We need at least 3 players to start the game!');
-    // else
-    // {
-    gameState.state = 1;
-    updateAll();
-    // }
+    if (gameState.players.length < 3)
+      socket.emit('error', 'Not enough players! We need at least 3 players to start the game!');
+    else
+    {
+      gameState.state = 1;
+      updateAll();
+    }
   });
 
   //Handle disconnection
@@ -390,12 +461,12 @@ io.on('connection', socket =>
 
   socket.on('createPrompt', (username, password, prompt) =>
   {
-    handleCreatePrompt(socket, username, password, prompt);
+    createPrompt(socket, username, password, prompt);
   });
 
   socket.on('getPrompts', () =>
   {
-    handleGetPrompts();
+    getPrompts();
   });
 
   socket.on('submitAnswer', (username, answer, prompt) =>
@@ -429,6 +500,16 @@ io.on('connection', socket =>
     let results = players.forEach((value, key) => { results.push(value.score) });
     console.log(results);
     socket.emit("scores", results);
+  });
+
+  socket.on("next", () =>
+  {
+    for (let [player, data] of players)
+    {
+      data.voteIndex++;
+      players.set(player, data);
+    }
+    updateAll();
   })
 
 });

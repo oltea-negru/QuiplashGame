@@ -1,5 +1,13 @@
+<div class="fixed-top">
+    <h4> Audience members: </h4>
+    <div v-for="member in audience">
+        <p>{{member}}</p>
+    </div>
+</div>
 <div v-if="gameState.state==1">
-    <h2>Player: {{me.username}}</h2>
+    <div class="player_card">
+        <h2>{{me.username}}</h2>
+    </div>
     <h3>Write something funny aka prompt </h3>
     <h4>Round {{gameState.round}}/3</h4>
 
@@ -15,9 +23,13 @@
 <div v-else-if="gameState.state==2">
     <div v-if="!audience.includes(me.username)">
         <div v-if="prompt1!=''">
-            <h2>Player: {{me.username}}</h2>
-            <h3>Answer this prompt {{prompt1}} </h3>
+            <div class="player_card">
+                <h2>{{me.username}}</h2>
+            </div>
+            <h3>Answer this prompt</h3><br />
+            <h3><i>{{prompt1}}</i> </h3>
             <br />
+
             <h4>Round {{gameState.round}}/3</h4>
             <div>
                 <textarea v-model="answer1" class="form-control z-depth-1"
@@ -43,17 +55,23 @@
             <h3>Enjoy the game while the others laugh at your answers!</h3>
         </div>
         <div v-else>
-            <div v-for="answer in gameState.currentAnswers[me.voteIndex]">
-                <button v-on:click="voteFor(answer)" class="btn btn-dark">{{answer}}</button>
+            <div class="aligned">
+                <div class="answers_box" v-for="answer in gameState.currentAnswers[me.voteIndex]">
+                    <button class="btn btn-dark btn-lg active" v-on:click="selectAnswer(answer)">{{answer}}
+                    </button>
+                </div>
+                <div v-if="clicked==true" class="answers_box">
+                    <p v-for=" player in gameState.whoAnswered[me.voteIndex]" class="btn btn-dark">{{player}}
+                    </p>
+                    <p v-for="vote in gameState.voteCount[me.voteIndex]" class="btn btn-dark">{{vote}}</p>
+                </div>
             </div>
+            <button v-if="clicked==false" v-on:click="voteFor()">Vote</button>
         </div>
     </div>
     <div v-else>
-        <h1>Waiting for other players to vote</h1>
-        <button v-on:click="seeScores()" class="btn btn-dark">See Results</button>
+        <h1>This round has finished x</h1>
+        <button v-if="me.username==players[0]" v-on:click="seeScores()" class="btn btn-dark">See Results</button>
     </div>
-</div>
-<div v-else>
-    <h1>Waiting for other players to vote</h1>
-</div>
+    <button v-if="me.username==players[0]" v-on:click="next()" class="btn btn-dark">Next Step</button>
 </div>

@@ -362,8 +362,13 @@ io.on('connection', socket =>
   socket.on('startGame', () =>
   {
     console.log('Start game');
+    // if (gameState.players.length < 3)
+    //   socket.emit('error', 'Not enough players! We need at least 3 players to start the game!');
+    // else
+    // {
     gameState.state = 1;
     updateAll();
+    // }
   });
 
   //Handle disconnection

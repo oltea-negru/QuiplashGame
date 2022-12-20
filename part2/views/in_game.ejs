@@ -17,6 +17,7 @@
         <div v-if="prompt1!=''">
             <h2>Player: {{me.username}}</h2>
             <h3>Answer this prompt {{prompt1}} </h3>
+            <br />
             <h4>Round {{gameState.round}}/3</h4>
             <div>
                 <textarea v-model="answer1" class="form-control z-depth-1"
@@ -37,17 +38,22 @@
 </div>
 <div v-else>
     <div v-if="me.voteIndex<gameState.currentPrompts.length">
-        <h1>Vote </h1>
         <h2>{{gameState.currentPrompts[me.voteIndex]}}</h2>
-        <div v-for="answer in gameState.currentAnswers[me.voteIndex]">
-            <button v-on:click="voteFor(answer)" class="btn btn-dark">{{answer}}</button>
+        <div v-if="gameState.currentPlayerPairs[me.voteIndex].includes(me.username)">
+            <h3>Enjoy the game while the others laugh at your answers!</h3>
         </div>
         <div v-else>
-            <h1>Waiting for other players to vote</h1>
-            <button v-on:click="seeScores()" class="btn btn-dark">See Results</button>
+            <div v-for="answer in gameState.currentAnswers[me.voteIndex]">
+                <button v-on:click="voteFor(answer)" class="btn btn-dark">{{answer}}</button>
+            </div>
         </div>
     </div>
     <div v-else>
         <h1>Waiting for other players to vote</h1>
+        <button v-on:click="seeScores()" class="btn btn-dark">See Results</button>
     </div>
+</div>
+<div v-else>
+    <h1>Waiting for other players to vote</h1>
+</div>
 </div>

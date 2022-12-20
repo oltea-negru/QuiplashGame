@@ -6,7 +6,7 @@ var app = new Vue({
     data: {
         error: '',
         me: { username: 'test10', score: 0, state: 0, password: 'test10test', voteIndex: 0 },
-        gameState: { state: false, round: 0, currentPrompts: [], currentAnswers: [] },
+        gameState: { state: false, round: 0, currentPrompts: [], currentAnswers: [], currentPlayerPairs: [] },
         players: [],
         audience: [],
         prompt1: '',

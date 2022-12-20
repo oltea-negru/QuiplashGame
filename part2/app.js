@@ -29,7 +29,7 @@ let promptsToAnswers = new Map();
 let currentPrompts = [];
 let currentPlayerPairs = [];
 let currentAnswers = [];
-let gameState = { state: 0, players: [], audience: [], round: 1, currentPrompts: [], currentAnswers: [] };
+let gameState = { state: 0, players: [], audience: [], round: 1, currentPrompts: [], currentAnswers: [], currentPlayerPairs: [] };
 
 //Setup socket.io
 const server = require('http').Server(app);
@@ -297,6 +297,7 @@ function handleVoting()
   gameState.state = 3;
   gameState.currentPrompts = currentPrompts;
   gameState.currentAnswers = currentAnswers;
+  gameState.currentPlayerPairs = currentPlayerPairs;
 
   updateAll();
 }

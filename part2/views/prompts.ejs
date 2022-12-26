@@ -1,0 +1,23 @@
+<div>
+    <!-- Player's username -->
+    <div class="player_card">
+        <h2>{{me.username}}</h2>
+    </div>
+
+
+    <!-- If player already submitted a prompt -->
+    <div v-if="clicked==true">
+        <p>Waiting for other players to finish their prompts</p>
+    </div>
+
+    <div v-else>
+        <h3>Write an amusing prompt for you teammates to answer!</h3>
+        <h4>Round {{gameState.round}}/3</h4>
+
+        <textarea v-model="prompt" class="form-control z-depth-1" placeholder="That moment when..."></textarea>
+        <button v-on:click="createPrompt()" class="btn btn-dark">Create prompt</button>
+    </div>
+
+    <!-- If player is the host -->
+    <button v-if="me.username==players[0]" v-on:click="getPrompts()" class="btn btn-dark">Go to writing </button>
+</div>

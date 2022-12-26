@@ -2,7 +2,6 @@
 <html lang="en">
     <div id="game" class="game">
         <%- include('header'); -%>
-
             <div v-if="me.state==0">
                 <%- include('login'); -%>
             </div>
@@ -11,24 +10,26 @@
             </div>
             <div v-else-if="me.state==2">
                 <div class="waiting_room" v-if="gameState.state==0">
-                    <%- include('waiting_room') %>
+                    <%- include('waiting_room') -%>
                 </div>
-                <div class="in_game" v-else-if="gameState.state>=1">
-                    <%- include('in_game') %>
+                <div class="in_game" v-else-if="gameState.state==1">
+                    <%- include('prompts') -%>
                 </div>
-                <div v-else-if="gameState.state==2">
-                    <h2>Results</h2>
+                <div class="in_game" v-else-if="gameState.state==2">
+                    <%- include('answers')-%>
                 </div>
-                <div v-else-if="gameState.state==3">
-                    <h2>Scores</h2>
+                <div class="in_game" v-else-if="gameState.state==3">
+                    <%- include ('voting')-%>
                 </div>
-                <div v-else-if="gameState.state==4">
-                    <h2>Game Over</h2>
+                <div class="in_game" v-else-if="gameState.state==4">
+                    <%- include ('scores')-%>
                 </div>
-
-            </div>
-            <div class="bg-white d-inline-flex p-1  fixed-bottom justify-content-center">
-                <p><strong>my state: {{me.state}} | game state: {{gameState.state}}</strong></p>
+                <div class="in_game" v-else-if="gameState.state==5">
+                    <%- include ('game_over')-%>
+                </div>
+                <div class="bg-white d-inline-flex p-1  fixed-bottom justify-content-center">
+                    <p><strong>my state: {{me.state}} | game state: {{gameState.state}}</strong></p>
+                </div>
             </div>
             <%- include('footer'); -%>
     </div>

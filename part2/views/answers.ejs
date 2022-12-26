@@ -1,0 +1,34 @@
+<div>
+    <!-- Only players can answer prompts -->
+    <div v-if="!audience.includes(me.username)">
+        <div v-if="prompt1!=''">
+            <div class="player_card">
+                <h2>{{me.username}}</h2>
+            </div>
+            <div>
+                <h3>Answer this prompt</h3>
+                <h3><i>{{prompt1}}</i> </h3>
+            </div>
+            <div>
+                <textarea v-model="answer1" class="form-control z-depth-1"
+                    placeholder="You debug a missing semicolon..."></textarea>
+                <button v-on:click="submitAnswer()" class="btn btn-dark">Submit Answer</button>
+            </div>
+        </div>
+
+        <!-- If player has finished submitting answers for their prompts -->
+        <div v-else>
+            <p>Others need to finish their answers</p>
+        </div>
+    </div>
+
+    <!-- The audience cannot answer prompts -->
+    <div v-else>
+        <h3>Players are coming up with funny answers!
+            <br> Sit back and enjoy the show!
+        </h3>
+    </div>
+
+    <!-- If player is the host -->
+    <button v-if="me.username==players[0]" v-on:click="vote()" class="btn btn-dark">Go to votinggggg</button>
+</div>

@@ -42,7 +42,9 @@ let gameState = {
   currentAnswers: [],
   currentPlayerPairs: [],
   voteCount: [],
-  whoAnswered: []
+  whoAnswered: [],
+  roundScores: [],
+  globalScores: [],
 };
 
 //Setup socket.io
@@ -235,15 +237,11 @@ async function getPrompts()
 
   for (let i = 0; i < totalPrompts.length; i++)
   {
-    let randomIndex = Math.floor(Math.random() * gameState.players.length);
-    while (searchForArray(playerPairs, [gameState.players[randomIndex], gameState.players[i]]) != -1 ||
-      randomIndex == i
-    )
-    {
-      randomIndex = Math.floor(Math.random() * gameState.players.length);
-    }
+    let j = i + 1;
+    if (j == totalPrompts.length)
+      j = 0;
     playerPairs[i].push(gameState.players[i]);
-    playerPairs[i].push(gameState.players[randomIndex]);
+    playerPairs[i].push(gameState.players[j]);
   }
   console.log('Total prompts: ', totalPrompts);
 
@@ -346,9 +344,11 @@ function handleVoting()
     }
     whoAnswered[i] = players;
     voteCount[i] = votes;
-    console.log(whoAnswered, "whoAnswered ");
-    console.log(voteCount, "voteCount ");
+
   }
+
+  console.log(whoAnswered, "whoAnswered ");
+  console.log(voteCount, "voteCount ");
 
   gameState.state = 3;
   gameState.currentPrompts = currentPrompts;
@@ -360,7 +360,7 @@ function handleVoting()
   updateAll();
 }
 
-function handleVote(socket, prompt, answer)
+function handleVote(prompt, answer)
 {
   var player = null;
 
@@ -479,30 +479,21 @@ io.on('connection', socket =>
     handleVoting();
   });
 
-  socket.on('nextRound', () =>
-  {
-    console.log('Next round');
-    gameState.round++;
-    if (gameState.round > 3)
-    {
-      gameState.state = 2;
-    }
-    updateAll();
-  });
-
   socket.on("voteFor", (prompt, answer) =>
   {
-    handleVote(socket, prompt, answer);
+    handleVote(prompt, answer);
   });
 
   socket.on("seeScores", () =>
   {
-    let results = players.forEach((value, key) => { results.push(value.score) });
-    console.log(results);
-    socket.emit("scores", results);
+    let results = [];
+    players.forEach((value, key) => { results.push(value.score) });
+    gameState.state = 4;
+    gameState.roundScores = results;
+    updateAll();
   });
 
-  socket.on("next", () =>
+  socket.on("increaseVotingIndex", () =>
   {
     for (let [player, data] of players)
     {
@@ -511,6 +502,33 @@ io.on('connection', socket =>
     }
     updateAll();
   })
+
+  socket.on('nextRound', () =>
+  {
+    if (gameState.round == 3)
+    {
+      gameState.state = 5;
+    }
+    else
+    {
+      console.log('Next round');
+      gameState.round++;
+      gameState.state = 1;
+      gameState.currentPrompts = [];
+      gameState.currentAnswers = [];
+      gameState.currentPlayerPairs = [];
+      gameState.whoAnswered = [];
+      gameState.voteCount = [];
+      gameState.roundScores = [];
+
+      for (let [player, data] of players)
+      {
+        data.voteIndex = 0;
+        players.set(player, data);
+      }
+    }
+    updateAll();
+  });
 
 });
 

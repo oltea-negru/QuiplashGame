@@ -38,7 +38,7 @@ let gameState = {
   state: 0,
   players: [],
   audience: [],
-  round: 4,
+  round: 0,
   currentPrompts: [],
   currentAnswers: [],
   currentPlayerPairs: [],
@@ -606,13 +606,13 @@ io.on('connection', socket =>
   {
     console.log('Start game');
     // Check if there are enough players
-    if (gameState.players.length < 3)
-      socket.emit('error', 'Not enough players! We need at least 3 players to start the game!');
-    else
-    {
-      gameState.state = 1;
-      updateAll();
-    }
+    // if (gameState.players.length < 3)
+    //   socket.emit('error', 'Not enough players! We need at least 3 players to start the game!');
+    // else
+    // {
+    gameState.state = 1;
+    updateAll();
+    // }
   });
 
 

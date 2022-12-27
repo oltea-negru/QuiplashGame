@@ -1,21 +1,20 @@
-
 body {
     background-size: cover;
     background-repeat: no-repeat;
     background-color: whitesmoke;
 }
 
-.game{
+.game {
     display: flex;
-        justify-content: center;
-        align-items: center;
-        text-align: center;
-        min-height: 100vh;
-        width: 100%;
- 
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    min-height: 100vh;
+    width: 100%;
 }
 
-.aligned{
+.aligned {
     display: flex;
     flex-direction: column;
     justify-content: space-around;
@@ -32,8 +31,7 @@ body {
     text-align: center;
 }
 
-
-input{
+input {
     width: 300px;
     height: 40px;
     border-radius: 5px;
@@ -44,7 +42,7 @@ input{
     margin-bottom: 10px;
 }
 
-button{
+button {
     width: 250px;
     height: 40px;
     border-radius: 5px;
@@ -56,17 +54,15 @@ button{
     margin-bottom: 10px;
 }
 
-.player_card{
-    text-align: center;
+.player_card {
+
     border-radius: 10px;
-    display: flex;
-    justify-content: center;
-    padding: 3px 10px;
+    padding: 5px;
     background-color: rgb(125, 164, 124);
     color: white;
 }
 
-.waiting_players{
+.waiting_players {
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -77,11 +73,7 @@ button{
     padding: 30px;
 }
 
-.waiting_audience{
-    margin-top: 20px;
-}
-
-.in_game{
+.in_game {
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -92,7 +84,7 @@ button{
     padding: 30px;
 }
 
-textarea{
+textarea {
     width: 500px;
     height: 60px;
     border-radius: 5px;
@@ -104,16 +96,74 @@ textarea{
     text-align: center;
 }
 
-.login{
+.banner-green {
+    background-color: rgb(125, 164, 124);
+    color: white;
+    border-radius: 10px;
+    padding: 5px;
+}
+
+.banner-red {
+    background-color: rgb(164, 125, 125);
+    color: white;
+    border-radius: 10px;
+    padding: 5px;
+}
+
+.login {
     display: flex;
     flex-direction: column;
     align-items: center;
 }
 
-.answers_box{
+.answers_box {
     display: flex;
     flex-direction: column;
     justify-content: space-around;
     align-items: center;
     margin-top: 20px;
+}
+
+.logo {
+
+    animation-name: bounce;
+    animation-duration: 0.7s;
+    animation-direction: alternate;
+    animation-timing-function: cubic-bezier(0.95, 0.05, 0.795, 0.035);
+    animation-iteration-count: infinite;
+}
+
+.audience_side {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
+    left: 0;
+    bottom: 0;
+    margin-bottom: 75px;
+    width: 100%;
+    position: fixed;
+}
+
+.players_side {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
+    left: 0;
+    top: 0;
+    width: 100%;
+    position: fixed;
+}
+
+.spaceLeft {
+    margin-left: 20px !important;
+}
+
+@keyframes bounce {
+    from {
+        transform: translateY(0) scale(1);
+    }
+
+    to {
+        transform: translateY(70px) scale(1, 0.5);
+    }
 }

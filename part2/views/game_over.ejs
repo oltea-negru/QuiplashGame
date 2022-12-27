@@ -1,11 +1,8 @@
-<div>
-    Game results:
-    <div v-for="score in gameState.scores">
-        <h2>{{score}}</h2>
-        <h2>for {{players[gameState.scores.indexOf(score)]}}</h2>
-    </div>
-
-    <!-- If  -->
-    <button v-if="me.username==players[0]" v-on:click="getLeaderboard()" class="btn btn-dark">See
-        leaderboard</button>
+Game results:
+<div v-for="score in gameState.scores">
+    <h2>{{score}}</h2>
+    <h2>for {{players[gameState.scores.indexOf(score)]}}</h2>
 </div>
+
+<!-- If  -->
+<button v-if="me.username==players[0]" v-on:click="getLeaderboard()" class="btn btn-dark">See top players</button>

@@ -23,6 +23,7 @@ var app = new Vue({
         prompt1: '',
         prompt2: '',
         clicked: false,
+        countDown: 10,
         secondClicked: false,
         prompt: '',
         answer: '',
@@ -32,6 +33,9 @@ var app = new Vue({
     mounted: function ()
     {
         connect();
+    },
+    components: {
+
     },
     methods: {
         login()
@@ -48,7 +52,9 @@ var app = new Vue({
         },
         startGame()
         {
+            this.countDownTimer();
             socket.emit('startGame');
+
         },
         createPrompt()
         {
@@ -98,9 +104,20 @@ var app = new Vue({
         getLeaderboard()
         {
             socket.emit('getLeaderboard');
+        },
+        countDownTimer()
+        {
+            if (this.countDown > 0)
+            {
+                setTimeout(() =>
+                {
+                    this.countDown -= 1
+                    this.countDownTimer()
+                }, 1000)
+            }
         }
 
-    }
+    },
 });
 
 function connect()

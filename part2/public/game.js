@@ -1,3 +1,4 @@
+
 var socket = null;
 
 //Prepare game
@@ -5,7 +6,7 @@ var app = new Vue({
     el: '#game',
     data: {
         error: '',
-        me: { username: 'test10', score: 0, state: 0, password: 'test10test', voteIndex: 0 },
+        me: { username: 'test10', score: 0, state: 0, password: 'test10test', voteIndex: 0, stats: [], openStats: false },
         gameState: {
             state: false,
             round: 0,
@@ -25,6 +26,7 @@ var app = new Vue({
         clicked: false,
         countDown: 10,
         secondClicked: false,
+        audio: false,
         prompt: '',
         answer: '',
         answer1: '',
@@ -33,9 +35,8 @@ var app = new Vue({
     mounted: function ()
     {
         connect();
-    },
-    components: {
-
+        var myTrack = new window.Audio('@/public/audio.mp3');
+        myTrack.play();
     },
     methods: {
         login()
@@ -77,17 +78,25 @@ var app = new Vue({
             this.prompt2 = '';
             this.answer2 = '';
         },
-        vote()
-        {
-            socket.emit('vote');
-
-        },
         voteFor()
         {
             if (this.clicked == true)
                 this.secondClicked = true;
             this.clicked = true;
             socket.emit('voteFor', this.gameState.currentPrompts[this.me.voteIndex], this.answer);
+        },
+        toggleStats()
+        {
+            this.me.openStats = !this.me.openStats;
+        },
+        async play() 
+        {
+            this.audio = true;
+        },
+        vote()
+        {
+            socket.emit('vote');
+
         },
         increaseVotingIndex()
         {
@@ -199,6 +208,12 @@ function connect()
         app.answer = '';
         app.answer1 = '';
         app.answer2 = '';
-    })
+    });
+
+    socket.on("stats", function (res)
+    {
+        app.me.stats = res.prompts;
+        console.log(res);
+    });
 
 }

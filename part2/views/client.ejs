@@ -6,13 +6,24 @@
             <div class="in_game" v-if="me.state==0"><%- include('login'); -%></div>
             <div class="in_game" v-else-if="me.state==1"><%- include('register'); -%></div>
             <div v-else-if="me.state==2">
-                <h4 class="banner-green">PLAYERS</h4>
+                <div v-if="me.openStats==false">
+                    <button v-on:click="toggleStats()">Prompt history</button>
+                </div>
+                <div class="in_game stats" v-else>
+                    <button v-on:click="toggleStats()">Minimize</button>
+                    <h2>Your last 5 prompts :)</h2>
+                    <div class="text-black" v-for="prompt in me.stats">
+                        <ol>{{prompt}}</ol>
+                    </div>
+                </div>
+                <h4 class=" banner-green">PLAYERS</h4>
                 <div class="players_side">
                     <div class="logo" v-for="member in players">
                         <h2 class="spaceLeft">{{ member }}</h2>
                     </div>
                 </div>
                 <div>{{countDown}}</div>
+                <div><button class="bg-green" v-on:click="play()"> Play</button></div>
 
                 <div class="waiting_room" v-if="gameState.state==0">
                     <%- include('waiting_room') -%>

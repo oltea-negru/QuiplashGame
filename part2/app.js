@@ -127,20 +127,21 @@ async function login(socket, username, password)
       {
         playersToSockets.set(username, socket);
         socketsToPlayers.set(socket, username);
+        getStats(socket);
 
         // If there are less than 3 players and the game hasn't started, add as player
         if (gameState.players.length < 3 && gameState.state == 0)
         {
           if (!gameState.players.includes(username))
             gameState.players.push(username);
-          players.set(username, { username: username, score: 0, state: 2, password: password, voteIndex: 0 });
+          players.set(username, { username: username, score: 0, state: 2, password: password, voteIndex: 0, stats: [], openStats: false });
         }
         // If there are 3 or more players or if the game has started, add as audience member
         else if (gameState.players.length >= 3 || gameState.state > 0)
         {
           if (!gameState.audience.includes(username))
             gameState.audience.push(username);
-          players.set(username, { username: username, score: 0, state: 2, password: password, voteIndex: 0 });
+          players.set(username, { username: username, score: 0, state: 2, password: password, voteIndex: 0, stats: [], openStats: false });
         }
         updateAll();
       }
@@ -171,14 +172,14 @@ async function register(socket, username, password)
         {
           if (!gameState.players.includes(username))
             gameState.players.push(username);
-          players.set(username, { username: username, score: 0, state: 2, password: password });
+          players.set(username, { username: username, score: 0, state: 2, password: password, voteIndex: 0, stats: [], openStats: false });
         }
         // If there are 3 or more players or if the game has started, add as audience member
         else if (gameState.players.length >= 3 || gameState.state > 0)
         {
           if (!gameState.audience.includes(username))
             gameState.audience.push(username);
-          players.set(username, { username: username, score: 0, state: 2, password: password });
+          players.set(username, { username: username, score: 0, state: 2, password: password, voteIndex: 0, stats: [], openStats: false });
         }
         updateAll();
       }
@@ -528,6 +529,17 @@ async function handleGetLeaderboard()
   updateAll();
 }
 
+async function getStats(socket)
+{
+  console.log("Getting stats");
+  let playerPrompts = [];
+  let player = socketsToPlayers.get(socket);
+
+  let res = await axios.post(cloud_server + prompts_get, { "players": [player] }, { headers: headers });
+  res.data.forEach((value) => { playerPrompts.push(value.text) });
+
+  socket.emit('stats', { "prompts": playerPrompts.slice(0, 5) });
+}
 // Handles the end of the round scores
 function seeRoundScores()
 {

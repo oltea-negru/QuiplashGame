@@ -612,6 +612,7 @@ io.on('connection', socket =>
     // {
     gameState.state = 1;
     updateAll();
+    io.emit('gameStarted');
     // }
   });
 

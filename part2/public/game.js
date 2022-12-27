@@ -8,7 +8,7 @@ var app = new Vue({
         me: { username: 'test10', score: 0, state: 0, password: 'test10test', voteIndex: 0 },
         gameState: {
             state: false,
-            round: 0,
+            round: 1,
             currentPrompts: [],
             currentAnswers: [],
             currentPlayerPairs: [],
@@ -23,7 +23,7 @@ var app = new Vue({
         prompt1: '',
         prompt2: '',
         clicked: false,
-        countDown: 10,
+        countDown: 5,
         secondClicked: false,
         prompt: '',
         answer: '',
@@ -50,24 +50,10 @@ var app = new Vue({
         {
             this.me.state = state;
         },
-        startGame()
-        {
-            this.countDownTimer();
-            socket.emit('startGame');
-
-        },
         createPrompt()
         {
             socket.emit('createPrompt', this.me.username, this.me.password, this.prompt);
             this.prompt = '';
-        },
-        nextRound()
-        {
-            socket.emit('nextRound');
-        },
-        getPrompts()
-        {
-            socket.emit('getPrompts');
         },
         submitAnswer()
         {
@@ -77,17 +63,32 @@ var app = new Vue({
             this.prompt2 = '';
             this.answer2 = '';
         },
-        vote()
-        {
-            socket.emit('vote');
-
-        },
         voteFor()
         {
             if (this.clicked == true)
                 this.secondClicked = true;
             this.clicked = true;
             socket.emit('voteFor', this.gameState.currentPrompts[this.me.voteIndex], this.answer);
+        },
+        selectAnswer(answer)
+        {
+            this.answer = answer;
+        },
+        nextRound()
+        {
+            socket.emit('nextRound');
+        },
+        getPrompts()
+        {
+            socket.emit('getPrompts');
+        },
+        startGame()
+        {
+            socket.emit('startGame');
+        },
+        vote()
+        {
+            socket.emit('vote');
         },
         increaseVotingIndex()
         {
@@ -97,10 +98,7 @@ var app = new Vue({
         {
             socket.emit('seeScores');
         },
-        selectAnswer(answer)
-        {
-            this.answer = answer;
-        },
+
         getLeaderboard()
         {
             socket.emit('getLeaderboard');
@@ -115,6 +113,33 @@ var app = new Vue({
                     this.countDownTimer()
                 }, 1000)
             }
+            else if (this.gameState.state == 1)
+            {
+                this.getPrompts(); this.countDown = 5; this.countDownTimer();
+            }
+            else if (this.gameState.state == 2)
+            {
+                this.vote();
+                //  this.countDown = 5; this.countDownTimer();
+            }
+            else if (this.gameState.state == 3 && this.gameState.round < 4)
+            {
+                this.increaseVotingIndex(); this.countDown = 10; this.countDownTimer();
+            }
+            else if (this.gameState.state == 3 && this.gameState.round == 4)
+            {
+                this.seeScores();
+                // this.countDown = 5; this.countDownTimer();
+            }
+            // else if (this.gameState.state == 4)
+            // {
+            //     this.getLeaderboard(); this.countDown = 5; this.countDownTimer();
+            // }
+            else
+            {
+                this.countDown = 5;
+            }
+
         }
 
     },
@@ -199,6 +224,11 @@ function connect()
         app.answer = '';
         app.answer1 = '';
         app.answer2 = '';
+    })
+
+    socket.on("gameStarted", () =>
+    {
+        app.countDownTimer();
     })
 
 }

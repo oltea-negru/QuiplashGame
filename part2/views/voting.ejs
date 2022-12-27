@@ -7,7 +7,7 @@
             <h2>{{gameState.currentPrompts[me.voteIndex]}}</h2>
             <div class="aligned">
                 <div class="answers_box" v-for="answer in gameState.currentAnswers[me.voteIndex]">
-                    <button class="btn btn-dark btn-lg active" v-on:click="selectAnswer(answer)">{{answer}}
+                    <button class="btn btn-dark btn-lg active" v-on:click="selectAnswer(answer)">{{answer+" "}}
                     </button>
                 </div>
                 <div v-if="clicked==true" class="answers_box">

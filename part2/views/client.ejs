@@ -27,11 +27,13 @@
                 <div class="in_game" v-else-if="gameState.state==5">
                     <%- include ('game_over')-%>
                 </div>
-                <div class="bg-white d-inline-flex p-1  fixed-bottom justify-content-center">
-                    <p><strong>my state: {{me.state}} | game state: {{gameState.state}}</strong></p>
+                <div class="in_game" v-else-if="gameState.state==6">
+                    <%- include ('leaderboard')-%>
+                        <div class="bg-white d-inline-flex p-1  fixed-bottom justify-content-center">
+                            <p><strong>my state: {{me.state}} | game state: {{gameState.state}}</strong></p>
+                        </div>
                 </div>
+                <%- include('footer'); -%>
             </div>
-            <%- include('footer'); -%>
-    </div>
 
 </html>

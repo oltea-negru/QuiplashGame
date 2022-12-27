@@ -44,6 +44,7 @@ let gameState = {
   voteCount: [],
   whoAnswered: [],
   roundScores: [],
+  scores: [],
   globalScores: [],
 };
 
@@ -360,7 +361,7 @@ function handleVoting()
   updateAll();
 }
 
-function handleVote(prompt, answer)
+function handleVote(prompt, answer) 
 {
   var player = null;
 
@@ -412,6 +413,29 @@ function handleVote(prompt, answer)
   console.log("New score", data.score, "for player", player);
   updateAll();
 
+}
+
+function handleTotalScores()
+{
+
+  let aux = new Map();
+  for (let [key, value] of players)
+  {
+    aux.set(key, value.score);
+  }
+  let sortedAux = new Map([...aux.entries()].sort((a, b) => b[1] - a[1]));
+  gameState.scores = Array.from(sortedAux.values());
+  gameState.players = Array.from(sortedAux.keys());
+
+  updateAll();
+}
+
+function handleGetLeaderboard()
+{
+  let scores = [1, 2, 3];
+  gameState.globalScores = scores;
+  gameState.state = 6;
+  updateAll();
 }
 
 //Handle new connection
@@ -508,18 +532,14 @@ io.on('connection', socket =>
     if (gameState.round == 3)
     {
       gameState.state = 5;
+      handleTotalScores();
     }
     else
     {
       console.log('Next round');
       gameState.round++;
       gameState.state = 1;
-      gameState.currentPrompts = [];
-      gameState.currentAnswers = [];
-      gameState.currentPlayerPairs = [];
-      gameState.whoAnswered = [];
-      gameState.voteCount = [];
-      gameState.roundScores = [];
+
 
       for (let [player, data] of players)
       {
@@ -529,6 +549,11 @@ io.on('connection', socket =>
     }
     updateAll();
   });
+
+  socket.on("getLeaderboard", () =>
+  {
+    handleGetLeaderboard();
+  })
 
 });
 

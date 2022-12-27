@@ -16,6 +16,7 @@ var app = new Vue({
             voteCount: [],
             roundScores: [],
             globalScores: [],
+            scores: []
         },
         players: [],
         audience: [],
@@ -51,6 +52,7 @@ var app = new Vue({
         createPrompt()
         {
             socket.emit('createPrompt', this.me.username, this.me.password, this.prompt);
+            this.prompt = '';
         },
         nextRound()
         {
@@ -88,6 +90,10 @@ var app = new Vue({
         selectAnswer(answer)
         {
             this.answer = answer;
+        },
+        getLeaderboard()
+        {
+            socket.emit('getLeaderboard');
         }
 
     }

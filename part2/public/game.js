@@ -68,6 +68,7 @@ var app = new Vue({
             this.prompt1 = this.prompt2;
             this.answer1 = this.answer2;
             this.prompt2 = '';
+            this.answer2 = '';
         },
         vote()
         {
@@ -77,8 +78,9 @@ var app = new Vue({
         voteFor()
         {
             this.clicked = true;
-            if (this.answer != '')
-                socket.emit('voteFor', this.gameState.currentPrompts[this.me.voteIndex], this.answer);
+            if (this.gameState.round == 4)
+                this.gameState.round = 5;
+            socket.emit('voteFor', this.gameState.currentPrompts[this.me.voteIndex], this.answer);
         },
         increaseVotingIndex()
         {

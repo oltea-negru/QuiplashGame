@@ -291,7 +291,7 @@ function createPlayerPairs()
 
   console.log('Players pairs: ', playerPairs);
   console.log('Players to prompts to answers: ', playersToPromptsToAnswers);
-  console.log('Prompts to answers: ', promptsToAnswers);
+  console.log('Prompts to answersssssssssssss: ', promptsToAnswers);
 
 }
 
@@ -299,6 +299,7 @@ function createPlayerPairs()
 function updatePlayersPrompts(currentPrompts, currentPlayerPairs)
 {
   console.log('Update players prompts');
+
   for (let i = 0; i < currentPlayerPairs.length; i++)
   {
     let socket1 = playersToSockets.get(currentPlayerPairs[i][0]);
@@ -374,9 +375,16 @@ function vote()
         }
       }
     }
-    whoAnswered[i] = players;
-    voteCount[i] = votes;
-
+    if (votes.length > 2)
+    {
+      whoAnswered[i] = Array.from(new Set(players));
+      voteCount[i] = votes.slice(0, 2);
+    }
+    else
+    {
+      whoAnswered[i] = players;
+      voteCount[i] = votes;
+    }
   }
 
   console.log(whoAnswered, "whoAnswered ");
@@ -442,7 +450,11 @@ function submitVote(prompt, answer)
 
   console.log("Incresing score of player: ", player, " by ", gameState.round * 100);
   let data = players.get(player);
-  data.score += gameState.round * 100;
+  console.log(gameState.round, "gameState.roundddddddddddddddddddddddddddddddddddddddddddddddddddddd")
+  if (gameState.round == 4)
+    data.score += gameState.round * 100 + 50;
+  else
+    data.score += gameState.round * 100;
   players.set(player, data);
   console.log("New score", data.score, "for player", player);
   updateAll();
@@ -527,7 +539,7 @@ function seeRoundScores()
 function nextRound()
 {
   // If it's the last round, go to the end game state
-  if (gameState.round == 3)
+  if (gameState.round == 4)
   {
     gameState.state = 5;
     handleTotalScores();

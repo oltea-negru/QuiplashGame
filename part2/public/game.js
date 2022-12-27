@@ -23,6 +23,7 @@ var app = new Vue({
         prompt1: '',
         prompt2: '',
         clicked: false,
+        secondClicked: false,
         prompt: '',
         answer: '',
         answer1: '',
@@ -77,9 +78,9 @@ var app = new Vue({
         },
         voteFor()
         {
+            if (this.clicked == true)
+                this.secondClicked = true;
             this.clicked = true;
-            if (this.gameState.round == 4)
-                this.gameState.round = 5;
             socket.emit('voteFor', this.gameState.currentPrompts[this.me.voteIndex], this.answer);
         },
         increaseVotingIndex()
@@ -147,6 +148,12 @@ function connect()
     {
         app.clicked = true;
         app.prompt = '';
+        app.prompt1 = '';
+        app.prompt2 = '';
+        app.prompt = '';
+        app.answer = '';
+        app.answer1 = '';
+        app.answer2 = '';
     });
 
     socket.on('promptToAnswer', function (res)
@@ -165,6 +172,16 @@ function connect()
     socket.on("changeClick", () =>
     {
         app.clicked = false;
+    })
+
+    socket.on("resetMeState", () =>
+    {
+        app.prompt1 = '';
+        app.prompt2 = '';
+        app.prompt = '';
+        app.answer = '';
+        app.answer1 = '';
+        app.answer2 = '';
     })
 
 }

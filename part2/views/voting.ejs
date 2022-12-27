@@ -17,8 +17,10 @@
                 </div>
             </div>
             <button v-if="clicked==false" v-on:click="voteFor()">Vote</button>
-            <button v-if="gameState.round==4&&clicked==true" v-on:click="voteFor()" class="btn btn-dark">Second
-                Vote</button>
+            <div v-if="clicked == true">
+                <button v-if="secondClicked==false" v-on:click="voteFor()" class="btn btn-dark">Second
+                    Vote</button>
+            </div>
         </div>
 
         <!-- If the player has submitted all their votes -->

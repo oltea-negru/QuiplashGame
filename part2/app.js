@@ -38,7 +38,7 @@ let gameState = {
   state: 0,
   players: [],
   audience: [],
-  round: 1,
+  round: 4,
   currentPrompts: [],
   currentAnswers: [],
   currentPlayerPairs: [],
@@ -238,6 +238,7 @@ async function getPrompts()
 
   currentPrompts = totalPrompts;
   console.log('Total prompts: ', totalPrompts);
+  console.log('Current prompts: ', currentPrompts);
 
   createPlayerPairs();
 }
@@ -307,6 +308,8 @@ function updatePlayersPrompts(currentPrompts, currentPlayerPairs)
 
     socket1.emit('promptToAnswer', currentPrompts[i]);
     socket2.emit('promptToAnswer', currentPrompts[i]);
+
+    console.log(currentPrompts[i], "import here");
   }
 
   gameState.state++;
@@ -452,7 +455,7 @@ function submitVote(prompt, answer)
   let data = players.get(player);
   console.log(gameState.round, "gameState.roundddddddddddddddddddddddddddddddddddddddddddddddddddddd")
   if (gameState.round == 4)
-    data.score += gameState.round * 100 + 50;
+    data.score += 50;
   else
     data.score += gameState.round * 100;
   players.set(player, data);
@@ -567,6 +570,8 @@ function nextRound()
     whoAnswered = [];
     voteCount = [];
     promptsSubmitted = [];
+
+    io.emit("resetMeState");
 
     for (let [player, data] of players)
     {

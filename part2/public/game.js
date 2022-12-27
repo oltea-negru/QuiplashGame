@@ -77,7 +77,8 @@ var app = new Vue({
         voteFor()
         {
             this.clicked = true;
-            socket.emit('voteFor', this.gameState.currentPrompts[this.me.voteIndex], this.answer);
+            if (this.answer != '')
+                socket.emit('voteFor', this.gameState.currentPrompts[this.me.voteIndex], this.answer);
         },
         increaseVotingIndex()
         {
@@ -158,5 +159,10 @@ function connect()
         }
         app.clicked = false;
     });
+
+    socket.on("changeClick", () =>
+    {
+        app.clicked = false;
+    })
 
 }

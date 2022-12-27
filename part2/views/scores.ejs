@@ -1,8 +1,8 @@
 <div>
     <h1>Round {{gameState.round}}/3 scores:</h1>
-    <div v-for="result in gameState.roundScores">
-        <h2>{{result}}</h2>
-        <h2>for {{players[gameState.roundScores.indexOf(result)]}}</h2>
+    <div v-for="(score,index) in gameState.roundScores">
+        <h2>{{score}}</h2>
+        <h2>for {{players[index]}}</h2>
     </div>
 
     <!-- If player is the host -->

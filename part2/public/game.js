@@ -21,10 +21,10 @@ var app = new Vue({
         },
         players: [],
         audience: [],
-        prompt1: ' ',
+        prompt1: '',
         prompt2: '',
         clicked: false,
-        countDown: 10,
+        countDown: 20,
         secondClicked: false,
         audio: false,
         prompt: '',
@@ -45,13 +45,13 @@ var app = new Vue({
         {
             socket.emit('register', this.me.username, this.me.password);
         },
-        changeMeState(state)
-        {
-            this.me.state = state;
-        },
         startGame()
         {
             socket.emit('startGame');
+        },
+        changeMeState(state)
+        {
+            this.me.state = state;
         },
         createPrompt()
         {
@@ -68,6 +68,7 @@ var app = new Vue({
         },
         submitAnswer()
         {
+
             socket.emit('submitAnswer', this.me.username, this.answer1, this.prompt1);
             this.prompt1 = this.prompt2;
             this.answer1 = this.answer2;
@@ -79,7 +80,7 @@ var app = new Vue({
             if (this.clicked == true)
                 this.secondClicked = true;
             this.clicked = true;
-            if (this.answer != "")
+            if (this.answer != '')
                 socket.emit('voteFor', this.gameState.currentPrompts[this.me.voteIndex], this.answer);
         },
         toggleStats()
@@ -130,7 +131,11 @@ var app = new Vue({
         },
         countDownTimer()
         {
-            if (this.countDown > 0)
+            if (this.countDown < 0)
+            {
+                console.log("Disconnecting");
+            }
+            else if (this.countDown > 0)
             {
                 setTimeout(() =>
                 {
@@ -140,36 +145,42 @@ var app = new Vue({
             }
             else
             {
-
+                this.countDown = 20;
                 if (this.me.username == this.players[0] && this.gameState.state == 1)
                 {
+                    console.log("get prompts");
                     this.getPrompts();
                 } else if (this.me.username == this.players[0] && this.gameState.state == 2)
                 {
+                    console.log("vote");
                     this.vote();
                 }
                 else if (this.me.username == this.players[0] && this.gameState.state == 3 && this.me.voteIndex < this.gameState.currentPrompts.length - 1)
                 {
+                    console.log("increase voting index");
                     this.increaseVotingIndex();
                 }
                 else if (this.me.username == this.players[0] && this.gameState.state == 3 && this.gameState.round <= 4)
                 {
+                    console.log("see scores");
                     this.seeScores();
                 }
                 else if (this.me.username == this.players[0] && this.gameState.state == 4)
                 {
+                    console.log("next round");
                     this.nextRound();
                 }
                 else if (this.me.username == this.players[0] && this.gameState.state == 5)
                 {
+                    console.log("get leaderboard");
                     this.getLeaderboard();
+                } else if (this.me.username == this.players[0] && this.gameState.state == 6)
+                {
+                    console.log("End game");
+                    this.countDown = -1;
                 }
 
-                if (this.gameState.state != 6)
-                {
-                    this.countDown = 10;
-                    this.countDownTimer();
-                }
+                this.countDownTimer();
             }
 
         }
@@ -199,6 +210,7 @@ function connect()
     socket.on('disconnect', function ()
     {
         alert('Disconnected');
+        app.countDown = -1;
         app.gameState.state = false;
     });
 
@@ -222,7 +234,7 @@ function connect()
     {
         app.clicked = true;
         app.prompt = '';
-        app.prompt1 = ' ';
+        app.prompt1 = '';
         app.prompt2 = '';
         app.prompt = '';
         app.answer = '';
@@ -256,6 +268,7 @@ function connect()
         app.answer = '';
         app.answer1 = '';
         app.answer2 = '';
+        app.clicked = false;
     });
 
     socket.on("stats", function (res)
@@ -268,5 +281,10 @@ function connect()
     {
         app.countDownTimer();
     });
+
+    socket.on("timeToVote", () =>
+    {
+        app.clicked = false;
+    })
 
 }

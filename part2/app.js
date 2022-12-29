@@ -130,14 +130,14 @@ async function login(socket, username, password)
         getStats(socket);
 
         // If there are less than 3 players and the game hasn't started, add as player
-        if (gameState.players.length < 3 && gameState.state == 0)
+        if (gameState.players.length < 8 && gameState.state == 0)
         {
           if (!gameState.players.includes(username))
             gameState.players.push(username);
           players.set(username, { username: username, score: 0, state: 2, password: password, voteIndex: 0, stats: [], openStats: false });
         }
         // If there are 3 or more players or if the game has started, add as audience member
-        else if (gameState.players.length >= 3 || gameState.state > 0)
+        else if (gameState.players.length >= 8 || gameState.state > 0)
         {
           if (!gameState.audience.includes(username))
             gameState.audience.push(username);
@@ -168,14 +168,14 @@ async function register(socket, username, password)
         socketsToPlayers.set(socket, username);
 
         // If there are less than 3 players and the game hasn't started, add as player
-        if (gameState.players.length < 3 && gameState.state == 0)
+        if (gameState.players.length < 8 && gameState.state == 0)
         {
           if (!gameState.players.includes(username))
             gameState.players.push(username);
           players.set(username, { username: username, score: 0, state: 2, password: password, voteIndex: 0, stats: [], openStats: false });
         }
         // If there are 3 or more players or if the game has started, add as audience member
-        else if (gameState.players.length >= 3 || gameState.state > 0)
+        else if (gameState.players.length >= 8 || gameState.state > 0)
         {
           if (!gameState.audience.includes(username))
             gameState.audience.push(username);
@@ -259,14 +259,23 @@ function createPlayerPairs()
   console.log('Who answered: ', whoAnswered);
   console.log('Vote count: ', voteCount);
 
-  for (let i = 0; i < currentPrompts.length; i++)
-  {
-    let j = i + 1;
-    if (j == currentPrompts.length)
-      j = 0;
-    playerPairs[i].push(gameState.players[i]);
-    playerPairs[i].push(gameState.players[j]);
-  }
+  if (gameState.players.length % 2 == 0)
+    for (let i = 0; i < currentPrompts.length; i++)
+    {
+      let j = i + 2;
+
+      playerPairs[i].push(gameState.players[i]);
+      playerPairs[i].push(gameState.players[j]);
+    }
+  else
+    for (let i = 0; i < currentPrompts.length; i++)
+    {
+      let j = i + 1;
+      if (j == currentPrompts.length)
+        j = 0;
+      playerPairs[i].push(gameState.players[i]);
+      playerPairs[i].push(gameState.players[j]);
+    }
 
 
   currentPlayerPairs = playerPairs;
@@ -296,6 +305,7 @@ function createPlayerPairs()
   console.log('Prompts to answersssssssssssss: ', promptsToAnswers);
 
 }
+
 
 // Updates the pairs of players with their corresponding prompt
 function updatePlayersPrompts(currentPrompts, currentPlayerPairs)
@@ -405,7 +415,7 @@ function vote()
 }
 
 // Handles the player's request to vote for an answer
-function submitVote(prompt, answer) 
+function submitVote(socket, prompt, answer) 
 {
   var player = null;
 
@@ -461,7 +471,7 @@ function submitVote(prompt, answer)
     data.score += gameState.round * 100;
   players.set(player, data);
   console.log("New score", data.score, "for player", player);
-  io.emit("timeToVote");
+
   updateAll();
 
 }
@@ -539,15 +549,22 @@ async function getStats(socket)
   let res = await axios.post(cloud_server + prompts_get, { "players": [player] }, { headers: headers });
   res.data.forEach((value) => { playerPrompts.push(value.text) });
 
+  console.log(playerPrompts, "playerPrompts");
+
   socket.emit('stats', { "prompts": playerPrompts.slice(0, 5) });
 }
 // Handles the end of the round scores
 function seeRoundScores()
 {
   let results = [];
-  players.forEach((value, key) => { results.push(value.score) });
+  gameState.players.forEach((player) =>
+  {
+    let data = players.get(player);
+    results.push(data.score)
+  });
   gameState.state = 4;
   gameState.roundScores = results;
+
   updateAll();
 }
 
@@ -619,14 +636,14 @@ io.on('connection', socket =>
   {
     console.log('Start game');
     // Check if there are enough players
-    // if (gameState.players.length < 3)
-    //   socket.emit('error', 'Not enough players! We need at least 3 players to start the game!');
-    // else
-    // {
-    gameState.state = 1;
-    io.emit("gameStarted");
-    updateAll();
-    // }
+    if (gameState.players.length < 3)
+      socket.emit('error', 'Not enough players! We need at least 3 players to start the game!');
+    else
+    {
+      gameState.state = 1;
+      io.emit("gameStarted");
+      updateAll();
+    }
   });
 
 
@@ -674,7 +691,7 @@ io.on('connection', socket =>
   // Handles submitting a vote
   socket.on("voteFor", (prompt, answer) =>
   {
-    submitVote(prompt, answer);
+    submitVote(socket, prompt, answer);
   });
 
   // Handles retrieving the scores of the current round
@@ -691,6 +708,9 @@ io.on('connection', socket =>
       data.voteIndex++;
       players.set(player, data);
     }
+
+    io.emit("timeToVote");
+
     updateAll();
 
   })

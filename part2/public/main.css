@@ -304,12 +304,12 @@ textarea {
     align-items: center;
     height: 70px;
     width: 70px;
-    color: #ff7a5a;
-    font-size: 14px;
+    color: #ffb85f;
+    font-size: 16px;
     font-weight: bolder;
     background-color: #fff;
     border-radius: 100%;
-    border: 5px solid #ff7a5a;
+    border: 5px solid #ffb85f;
     position: absolute;
     right: 0;
     top: 0;
@@ -357,12 +357,12 @@ textarea {
     align-items: center;
     height: 70px;
     width: 70px;
-    color: #ff7a5a;
+    color: #ffb85f;
     font-size: 30px;
     font-weight: bolder;
     background-color: #fff;
     border-radius: 100%;
-    border: 5px solid #ff7a5a;
+    border: 5px solid #ffb85f;
     position: absolute;
     top: 0;
     left: 0

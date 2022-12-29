@@ -3,9 +3,11 @@
     <div id="game" class="game">
         <%- include('header'); -%>
 
-            <div v-if="me.state==2" class="timer">{{countDown}}</div>
-            <div v-if="me.state==2" class="music">
+            <div v-if="me.state==2">
+                <div v-if="players.includes(me.username)" class="timer">{{countDown}}</div>
+            </div>
 
+            <div v-if="me.state==2" class="music">
                 <div class="toggle-sound">
                     <button v-if="audio==true" v-on:click="toggleMusic()">
                         Mute

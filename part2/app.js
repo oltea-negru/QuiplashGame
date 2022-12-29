@@ -38,7 +38,7 @@ let gameState = {
   state: 0,
   players: [],
   audience: [],
-  round: 0,
+  round: 1,
   currentPrompts: [],
   currentAnswers: [],
   currentPlayerPairs: [],
@@ -583,7 +583,6 @@ function nextRound()
     voteCount = [];
     promptsSubmitted = [];
 
-    io.emit("resetMeState");
 
     for (let [player, data] of players)
     {
@@ -592,6 +591,7 @@ function nextRound()
     }
   }
 
+  io.emit("resetMeState");
   io.emit('changeClick');
   updateAll();
 }
@@ -623,6 +623,7 @@ io.on('connection', socket =>
     // else
     // {
     gameState.state = 1;
+    io.emit("gameStarted");
     updateAll();
     // }
   });

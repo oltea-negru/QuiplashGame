@@ -3,27 +3,39 @@
     <div id="game" class="game">
         <%- include('header'); -%>
 
+            <div v-if="me.state==2" class="timer">{{countDown}}</div>
+            <div v-if="me.state==2" class="music">
+
+                <div class="toggle-sound">
+                    <button v-if="audio==true" v-on:click="toggleMusic()">
+                        Mute
+                    </button>
+                    <button v-else v-on:click="toggleMusic()">
+                        Play music
+                    </button>
+                </div>
+                <audio ref="audio" src="static/audio.ogg" loop id="audio"></audio>
+            </div>
+
             <div class="in_game" v-if="me.state==0"><%- include('login'); -%></div>
             <div class="in_game" v-else-if="me.state==1"><%- include('register'); -%></div>
             <div v-else-if="me.state==2">
                 <div v-if="me.openStats==false">
-                    <button v-on:click="toggleStats()">Prompt history</button>
+                    <button class="prompt_button" v-on:click="toggleStats()">Prompt history</button>
                 </div>
-                <div class="in_game stats" v-else>
-                    <button v-on:click="toggleStats()">Minimize</button>
+                <div class="stats" v-else>
+                    <button class="btn btn-outline-warning" v-on:click="toggleStats()">Minimize</button>
                     <h2>Your last 5 prompts :)</h2>
                     <div class="text-black" v-for="prompt in me.stats">
-                        <ol>{{prompt}}</ol>
+                        <ul>{{me.stats.indexOf(prompt)}}. "{{prompt}}"</ul>
                     </div>
                 </div>
-                <h4 class=" banner-green">PLAYERS</h4>
-                <div class="players_side">
-                    <div class="logo" v-for="member in players">
-                        <h2 class="spaceLeft">{{ member }}</h2>
+                <h4 class="banner-green">PLAYERS</h4>
+                <div v-if="gameState.state<5" class="players_side">
+                    <div class="logo " v-for="member in players">
+                        <h2 class="jumping_card_green spaceLeft">{{ member }}</h2>
                     </div>
                 </div>
-                <div>{{countDown}}</div>
-                <div><button class="bg-green" v-on:click="play()"> Play</button></div>
 
                 <div class="waiting_room" v-if="gameState.state==0">
                     <%- include('waiting_room') -%>
@@ -45,17 +57,11 @@
                 </div>
                 <div class="in_game" v-else-if="gameState.state==6">
                     <%- include ('leaderboard')-%>
-                        <div class="bg-white d-inline-flex p-1 fixed-bottom justify-content-center">
-                            <p>
-                                <strong>my state: {{ me.state }} | game state:
-                                    {{ gameState.state }}</strong>
-                            </p>
-                        </div>
                 </div>
                 <h4 class="banner-red">AUDIENCE</h4>
-                <div class="audience_side">
-                    <div class="logo" v-for="member in audience">
-                        <h2 class="spaceLeft">{{ member }}</h2>
+                <div v-if="gameState.state<5" class="audience_side">
+                    <div class="logo " v-for="member in audience">
+                        <h2 class="jumping_card_red spaceLeft">{{ member }}</h2>
                     </div>
                 </div>
                 <%- include('footer'); -%>

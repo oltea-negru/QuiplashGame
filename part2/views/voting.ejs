@@ -1,23 +1,32 @@
+<div class="player_card">
+    <h2>{{me.username}}</h2>
+</div>
 <!-- If there are answers to yet vote upon -->
 <div v-if="!gameState.currentPlayerPairs[me.voteIndex].includes(me.username)">
     <div v-if="me.voteIndex<gameState.currentPrompts.length">
         <h1>Vote for your favourite answer</h1>
         <!-- The prompt with the coresponding answers -->
-        <h2>{{gameState.currentPrompts[me.voteIndex]}}</h2>
+        <h3><i>"{{gameState.currentPrompts[me.voteIndex]}}"</i> </h3>
+
         <div class="aligned">
-            <div class="answers_box" v-for="answer in gameState.currentAnswers[me.voteIndex]">
-                <button class="btn btn-dark btn-lg active" v-on:click="selectAnswer(answer)">{{answer}}
-                </button>
+            <div class="answers_box">
+                <button v-for="answer in gameState.currentAnswers[me.voteIndex]" class="answer_button"
+                    v-on:click="selectAnswer(answer)">{{answer}}</button>
             </div>
-            <div v-if="clicked==true" class="answers_box">
-                <p v-for=" player in gameState.whoAnswered[me.voteIndex]" class="btn btn-dark">{{player}}
-                </p>
-                <p v-for="vote in gameState.voteCount[me.voteIndex]" class="btn btn-dark">{{vote}}</p>
+            <div v-if="clicked==true" class="vote_answer">
+                <div class="result_row">
+                    <p v-for=" player in gameState.whoAnswered[me.voteIndex]" class="reveal">{{player}}
+                    </p>
+                </div>
+                <div class="result_row">
+                    <p v-for="vote in gameState.voteCount[me.voteIndex]" class="result">{{vote}} votes</p>
+                </div>
             </div>
         </div>
-        <button v-if="clicked==false" v-on:click="voteFor()">Vote</button>
-        <div v-if="clicked == true">
-            <button v-if="secondClicked==false" v-on:click="voteFor()" class="btn btn-dark">Second
+
+        <button class="game_button" v-if="clicked==false" v-on:click="voteFor()">Vote</button>
+        <div v-if="clicked == true && gameState.round==4">
+            <button v-if="secondClicked==false" v-on:click="voteFor()" class="game_button">Second
                 Vote</button>
         </div>
     </div>
@@ -30,9 +39,5 @@
 
 <!-- A player cannot vote on a prompt they have answered to -->
 <div v-else>
-    <h3>Enjoy the game while the others laugh at your answers!</h3>
+    <p>Of course you want more points, but you cannot vote your own answer!</p>
 </div>
-
-<!-- If the player is the host -->
-<button v-if="me.username==players[0]" v-on:click="increaseVotingIndex()" class="btn btn-dark">Next Vote</button>
-<button v-if="me.username==players[0]" v-on:click="seeScores()" class="btn btn-dark">Go to round scores</button>

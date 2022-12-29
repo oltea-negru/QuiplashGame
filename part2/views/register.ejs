@@ -2,6 +2,6 @@
     <h2>Register</h2>
     <input type="text" v-model="me.username" placeholder="Enter your username" />
     <input type="password" v-model="me.password" placeholder="Enter your password" />
-    <button v-on:click="register">Register</button>
-    <button v-on:click="changeMeState(0)" class="btn btn-dark">Already have an account? Login!</button>
+    <button class="register_button" v-on:click="register">Register</button>
+    <button v-on:click="changeMeState(0)" class="change_button">Already have an account? Login!</button>
 </div>

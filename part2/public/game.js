@@ -9,7 +9,7 @@ var app = new Vue({
         me: { username: 'test10', score: 0, state: 0, password: 'test10test', voteIndex: 0, stats: [], openStats: false },
         gameState: {
             state: false,
-            round: 0,
+            round: 1,
             currentPrompts: [],
             currentAnswers: [],
             currentPlayerPairs: [],
@@ -35,8 +35,6 @@ var app = new Vue({
     mounted: function ()
     {
         connect();
-        var myTrack = new window.Audio('@/public/audio.mp3');
-        myTrack.play();
     },
     methods: {
         login()
@@ -53,9 +51,7 @@ var app = new Vue({
         },
         startGame()
         {
-            this.countDownTimer();
             socket.emit('startGame');
-
         },
         createPrompt()
         {
@@ -83,15 +79,33 @@ var app = new Vue({
             if (this.clicked == true)
                 this.secondClicked = true;
             this.clicked = true;
-            socket.emit('voteFor', this.gameState.currentPrompts[this.me.voteIndex], this.answer);
+            if (this.answer != "")
+                socket.emit('voteFor', this.gameState.currentPrompts[this.me.voteIndex], this.answer);
         },
         toggleStats()
         {
             this.me.openStats = !this.me.openStats;
         },
-        async play() 
+        toggleMusic() 
         {
-            this.audio = true;
+            let audio = this.$refs.audio;
+            document.querySelector(".toggle-sound").classList.add("paused");
+            if (
+                audio.paused &&
+                document.querySelector(".toggle-sound").classList.contains("paused")
+            )
+            {
+                console.log("play it")
+                audio.play();
+                this.audio = true;
+                document.querySelector(".toggle-sound").classList.remove("paused");
+            } else
+            {
+                console.log("pause it")
+                audio.pause();
+                this.audio = false;
+                document.querySelector(".toggle-sound").classList.add("paused");
+            }
         },
         vote()
         {
@@ -124,6 +138,40 @@ var app = new Vue({
                     this.countDownTimer()
                 }, 1000)
             }
+            else
+            {
+
+                if (this.me.username == this.players[0] && this.gameState.state == 1)
+                {
+                    this.getPrompts();
+                } else if (this.me.username == this.players[0] && this.gameState.state == 2)
+                {
+                    this.vote();
+                }
+                else if (this.me.username == this.players[0] && this.gameState.state == 3 && this.me.voteIndex < this.gameState.currentPrompts.length - 1)
+                {
+                    this.increaseVotingIndex();
+                }
+                else if (this.me.username == this.players[0] && this.gameState.state == 3 && this.gameState.round <= 4)
+                {
+                    this.seeScores();
+                }
+                else if (this.me.username == this.players[0] && this.gameState.state == 4)
+                {
+                    this.nextRound();
+                }
+                else if (this.me.username == this.players[0] && this.gameState.state == 5)
+                {
+                    this.getLeaderboard();
+                }
+
+                if (this.gameState.state != 6)
+                {
+                    this.countDown = 10;
+                    this.countDownTimer();
+                }
+            }
+
         }
 
     },
@@ -174,7 +222,7 @@ function connect()
     {
         app.clicked = true;
         app.prompt = '';
-        app.prompt1 = '';
+        app.prompt1 = ' ';
         app.prompt2 = '';
         app.prompt = '';
         app.answer = '';
@@ -213,7 +261,12 @@ function connect()
     socket.on("stats", function (res)
     {
         app.me.stats = res.prompts;
-        console.log(res);
+
+    });
+
+    socket.on("gameStarted", () =>
+    {
+        app.countDownTimer();
     });
 
 }

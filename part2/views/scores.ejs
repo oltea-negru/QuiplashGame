@@ -1,8 +1,10 @@
-<h1>Round {{gameState.round}}/4 scores:</h1>
-<div v-for="(score,index) in gameState.roundScores">
-    <h2>{{score}}</h2>
-    <h2>for {{players[index]}}</h2>
+<div class="player_card">
+    <h2>{{me.username}}</h2>
 </div>
-
-<!-- If player is the host -->
-<button v-if="me.username==players[0]" v-on:click="nextRound()" class="btn btn-dark">Start next round</button>
+<div class="score">
+    <h1>Round {{gameState.round}}/4 scores:</h1>
+    <div class="score_row" v-for="(score,index) in gameState.roundScores">
+        <h2>{{players[index]}}: </h2>
+        <h2>{{score}} </h2>
+    </div>
+</div>

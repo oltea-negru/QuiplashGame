@@ -1,12 +1,15 @@
 <div class="waiting_players">
+    <div class="player_card">
+        <h2>{{me.username}}</h2>
+    </div>
     <div>
         <h2>Waiting for players...</h2>
         <h4>{{players.length}}/8</h4>
     </div>
     <div v-if="me.username==players[0]">
-        <button v-on:click="startGame" class="btn btn-dark">Start game</button>
+        <button v-on:click="startGame" class="game_button">Start game</button>
     </div>
     <div v-else>
-        <p>Only admin can start the game :(</p>
+        <p>Only the first player who joined can start the game!</p>
     </div>
 </div>

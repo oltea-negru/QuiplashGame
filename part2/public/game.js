@@ -21,7 +21,7 @@ var app = new Vue({
         },
         players: [],
         audience: [],
-        prompt1: '',
+        prompt1: ' ',
         prompt2: '',
         clicked: false,
         countDown: 10,

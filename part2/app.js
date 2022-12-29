@@ -461,6 +461,7 @@ function submitVote(prompt, answer)
     data.score += gameState.round * 100;
   players.set(player, data);
   console.log("New score", data.score, "for player", player);
+  io.emit("timeToVote");
   updateAll();
 
 }
